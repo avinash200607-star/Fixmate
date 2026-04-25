@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMate | Admin Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card">
+      <div class="brand-block">
+        <a href="index.html" class="brand">FixMate</a>
+        <h1>Admin Login</h1>
+        <p>Sign in to manage users, providers, and platform operations.</p>
+      </div>
+
+      <form id="admin-login-form" class="auth-form">
+        <label>Email</label>
+        <input type="email" id="admin-email" placeholder="admin@fixmate.com" required />
+        <label>Password</label>
+        <input type="password" id="admin-password" placeholder="Enter password" required />
+        <button type="submit" class="submit-btn">Login as Admin</button>
+      </form>
+
+      <p class="status" id="admin-status"></p>
+      <p><a class="admin-link" href="auth.html">Back to user/provider auth</a></p>
+    </section>
+  </main>
+  <script src="admin-login.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>

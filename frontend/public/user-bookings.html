@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookings | FixMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .user-bookings-main {
+      min-height: calc(100vh - 80px);
+      padding: 2rem 1rem;
+      background: #f8f9fa;
+    }
+
+    .bookings-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .bookings-header {
+      margin-bottom: 2rem;
+    }
+
+    .bookings-header h1 {
+      font-size: 2rem;
+      color: #1a202c;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .bookings-header p {
+      color: #718096;
+      margin: 0;
+    }
+
+    .filters-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid #e2e8f0;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 0.75rem 1rem;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #718096;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s ease;
+      margin-bottom: -2px;
+    }
+
+    .filter-tab:hover {
+      color: #667eea;
+    }
+
+    .filter-tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .bookings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .booking-card {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .booking-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      border-color: #cbd5e0;
+    }
+
+    .booking-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .booking-card-title {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .booking-card-title h3 {
+      margin: 0 0 0.25rem;
+      color: #1a202c;
+      font-size: 1.1rem;
+    }
+
+    .booking-id {
+      color: #a0aec0;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .status-confirmed {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-completed {
+      background: #e0e7ff;
+      color: #3730a3;
+    }
+
+    .status-cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .booking-card-body {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .booking-detail {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .booking-detail-label {
+      color: #718096;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .booking-detail-value {
+      color: #1a202c;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .address-value {
+      color: #2d3748;
+      line-height: 1.5;
+      max-width: 300px;
+    }
+
+    .provider-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: #f7fafc;
+      border-radius: 8px;
+    }
+
+    .provider-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #667eea;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+    }
+
+    .provider-details {
+      flex: 1;
+    }
+
+    .provider-name {
+      color: #1a202c;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .provider-service {
+      color: #718096;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: white;
+      border-radius: 12px;
+      border: 1px dashed #cbd5e0;
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      color: #cbd5e0;
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      color: #718096;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: #a0aec0;
+      margin: 0;
+    }
+
+    .empty-state .btn {
+      margin-top: 1rem;
+    }
+
+    .status-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .status-message.show {
+      display: block;
+    }
+
+    .status-message.success {
+      background: #dcfce7;
+      color: #166534;
+      border-left: 4px solid #10b981;
+    }
+
+    @media (max-width: 768px) {
+      .booking-card-body {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .bookings-header h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">FM</span>
+        <span class="logo-text">FixMate</span>
+      </a>
+
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="providers.html">Browse Providers</a>
+        <a href="index.html#about">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="location-btn" type="button"><i class="fa-solid fa-location-dot"></i> New Delhi</button>
+        <a class="btn btn-light" href="auth.html">Login</a>
+        <a class="btn btn-primary" href="auth.html">Become a Provider</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="user-bookings-main">
+    <div class="container bookings-container">
+      <div class="bookings-header">
+        <h1>
+          <i class="fa-solid fa-calendar-check"></i>
+          My Bookings
+        </h1>
+        <p>View and track all your service bookings</p>
+      </div>
+
+      <div id="status-message" class="status-message"></div>
+
+      <div class="filters-tabs">
+        <button class="filter-tab active" data-status="all">
+          <i class="fa-solid fa-list"></i> All Bookings
+        </button>
+        <button class="filter-tab" data-status="pending">
+          <i class="fa-solid fa-hourglass-end"></i> Pending
+        </button>
+        <button class="filter-tab" data-status="confirmed">
+          <i class="fa-solid fa-check-circle"></i> Confirmed
+        </button>
+        <button class="filter-tab" data-status="completed">
+          <i class="fa-solid fa-star"></i> Completed
+        </button>
+      </div>
+
+      <div id="bookings-list" class="bookings-list"></div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-wrap">
+      <div>
+        <h3>FixMate</h3>
+        <p>Premium home services with trusted professionals.</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="providers.html">Browse Providers</a>
+        <a href="index.html#about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="user-bookings.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>

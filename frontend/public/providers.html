@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Browse Providers | FixMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="providers.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">FM</span>
+        <span class="logo-text">FixMate</span>
+      </a>
+
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="providers.html" class="active">Browse Providers</a>
+        <a href="index.html#about">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="location-btn" type="button"><i class="fa-solid fa-location-dot"></i> New Delhi</button>
+        <a class="btn btn-light" href="auth.html">Login</a>
+        <a class="btn btn-primary" href="auth.html">Become a Provider</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="providers-hero">
+      <div class="container">
+        <h1>Find Trusted Service Providers</h1>
+        <p>Browse verified professionals and book the best service for your needs</p>
+      </div>
+    </section>
+
+    <section class="providers-section">
+      <div class="container">
+        <div class="filters-wrapper">
+          <div class="filters-header">
+            <h2>Service Filter</h2>
+            <button class="filter-toggle" id="filter-toggle" aria-label="Toggle filters">
+              <i class="fa-solid fa-filter"></i> <span>Filters</span>
+            </button>
+          </div>
+          <div class="filters" id="filters">
+            <button class="filter-btn active" data-service="all">
+              All Services
+            </button>
+            <button class="filter-btn" data-service="AC Repair">
+              <i class="fa-solid fa-snowflake"></i> AC Repair
+            </button>
+            <button class="filter-btn" data-service="Cleaning">
+              <i class="fa-solid fa-soap"></i> Cleaning
+            </button>
+            <button class="filter-btn" data-service="Electrician">
+              <i class="fa-solid fa-bolt"></i> Electrician
+            </button>
+            <button class="filter-btn" data-service="Plumbing">
+              <i class="fa-solid fa-faucet-drip"></i> Plumbing
+            </button>
+            <button class="filter-btn" data-service="Appliance Repair">
+              <i class="fa-solid fa-blender"></i> Appliance Repair
+            </button>
+            <button class="filter-btn" data-service="Carpentry">
+              <i class="fa-solid fa-hammer"></i> Carpentry
+            </button>
+            <button class="filter-btn" data-service="Painting">
+              <i class="fa-solid fa-paint-roller"></i> Painting
+            </button>
+            <button class="filter-btn" data-service="Pest Control">
+              <i class="fa-solid fa-bug"></i> Pest Control
+            </button>
+          </div>
+        </div>
+
+        <div class="providers-list" id="providers-list">
+          <div class="loading">
+            <i class="fa-solid fa-spinner fa-spin"></i> Loading providers...
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-wrap">
+      <div>
+        <h3>FixMate</h3>
+        <p>Premium home services with trusted professionals.</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="providers.html">Browse Providers</a>
+        <a href="index.html#about">About</a>
+        <a href="auth.html">Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="providers.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>

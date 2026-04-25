@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMate Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { margin: 0; font-family: "Inter", sans-serif; background: #f3f7ff; color: #0f2348; }
+    .wrap { max-width: 1100px; margin: 32px auto; padding: 0 16px; display: grid; gap: 16px; }
+    .card { background: #fff; border: 1px solid #e1eaf9; border-radius: 16px; padding: 20px; box-shadow: 0 8px 22px rgba(12,35,72,.08); }
+    h1,h2 { margin: 0 0 8px; font-family: "Sora", sans-serif; }
+    p { margin: 4px 0; color: #5f6f89; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 8px; margin-top: 12px; }
+    .status { min-height: 24px; font-weight: 600; }
+    .status.success { color: #1c7b46; }
+    .status.error { color: #b42318; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; border-bottom: 1px solid #e7eefc; padding: 10px 8px; font-size: .94rem; }
+    th { color: #35527e; font-weight: 700; background: #f8fbff; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-action { border: none; border-radius: 8px; padding: 7px 10px; font-weight: 600; cursor: pointer; }
+    .btn-approve { background: #16a34a; color: #fff; }
+    .btn-reject { background: #dc2626; color: #fff; }
+    .btn-delete { background: #7f1d1d; color: #fff; }
+    .empty { padding: 16px; color: #6b7d98; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="logo"><span class="logo-icon">FM</span><span class="logo-text">FixMate</span></a>
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="providers.html">Browse Providers</a>
+        <a href="admin-panel.html" class="active">Admin Panel</a>
+      </nav>
+      <div class="nav-actions">
+        <button class="location-btn" type="button"><i class="fa-solid fa-location-dot"></i> New Delhi</button>
+        <a class="btn btn-light" href="admin-login.html">Admin Login</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card">
+      <h1>Admin Panel</h1>
+      <p>Approve or reject provider applications directly from this panel.</p>
+      <div class="meta">
+        <p><strong>Name:</strong> <span id="admin-name">-</span></p>
+        <p><strong>Email:</strong> <span id="admin-email">-</span></p>
+        <p><strong>Role:</strong> <span id="admin-role">-</span></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Pending Provider Requests</h2>
+      <p class="status" id="panel-status"></p>
+      <div id="pending-wrap"></div>
+    </section>
+
+    <section class="card">
+      <h2>All Providers</h2>
+      <p>Manage live providers, reject services, or permanently delete provider profiles.</p>
+      <div id="all-providers-wrap"></div>
+    </section>
+  </main>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("fixmateUser") || "{}");
+    if (user.role !== "admin") {
+      window.location.href = "admin-login.html";
+    }
+    document.getElementById("admin-name").textContent = user.name || "-";
+    document.getElementById("admin-email").textContent = user.email || "-";
+    document.getElementById("admin-role").textContent = user.role || "-";
+
+    const statusEl = document.getElementById("panel-status");
+    const pendingWrap = document.getElementById("pending-wrap");
+    const allProvidersWrap = document.getElementById("all-providers-wrap");
+
+    const setStatus = (msg, type = "") => {
+      statusEl.textContent = msg;
+      statusEl.className = `status ${type}`.trim();
+    };
+
+    const escapeHtml = (text) =>
+      String(text ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    const loadPending = async () => {
+      try {
+        const response = await fetch("/api/admin/providers/pending");
+        const rows = await response.json();
+        if (!response.ok) {
+          setStatus(rows.message || "Failed to load pending providers.", "error");
+          return;
+        }
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          pendingWrap.innerHTML = '<div class="empty">No pending provider requests right now.</div>';
+          return;
+        }
+
+        pendingWrap.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Service</th>
+                <th>Experience</th>
+                <th>Location</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((r) => `
+                <tr>
+                  <td>${escapeHtml(r.name)}</td>
+                  <td>${escapeHtml(r.service_type)}</td>
+                  <td>${escapeHtml(r.experience_years)} yrs</td>
+                  <td>${escapeHtml(r.location)}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-action btn-approve" data-id="${r.id}">Approve</button>
+                      <button class="btn-action btn-reject" data-id="${r.id}">Reject</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+
+        pendingWrap.querySelectorAll(".btn-approve").forEach((btn) => {
+          btn.addEventListener("click", () => approveProvider(btn.dataset.id));
+        });
+        pendingWrap.querySelectorAll(".btn-reject").forEach((btn) => {
+          btn.addEventListener("click", () => rejectProvider(btn.dataset.id));
+        });
+      } catch {
+        setStatus("Unable to load provider requests.", "error");
+      }
+    };
+
+    const loadAllProviders = async () => {
+      try {
+        const response = await fetch("/api/admin/providers");
+        const rows = await response.json();
+        if (!response.ok) {
+          setStatus(rows.message || "Failed to load providers.", "error");
+          return;
+        }
+
+        if (!Array.isArray(rows) || rows.length === 0) {
+          allProvidersWrap.innerHTML = '<div class="empty">No provider profiles found.</div>';
+          return;
+        }
+
+        allProvidersWrap.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Service</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map((r) => `
+                <tr>
+                  <td>${escapeHtml(r.name)}</td>
+                  <td>${escapeHtml(r.service_type)}</td>
+                  <td>${escapeHtml(r.location)}</td>
+                  <td>${escapeHtml(r.review_status || "approved")}</td>
+                  <td>
+                    <div class="actions">
+                      <button class="btn-action btn-reject" data-id="${r.id}">Reject</button>
+                      <button class="btn-action btn-delete" data-id="${r.id}">Delete Permanently</button>
+                    </div>
+                  </td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        `;
+
+        allProvidersWrap.querySelectorAll(".btn-reject").forEach((btn) => {
+          btn.addEventListener("click", () => rejectProvider(btn.dataset.id));
+        });
+        allProvidersWrap.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.addEventListener("click", () => deleteProvider(btn.dataset.id));
+        });
+      } catch {
+        setStatus("Unable to load all providers list.", "error");
+      }
+    };
+
+    const approveProvider = async (id) => {
+      try {
+        const response = await fetch(`/api/admin/providers/${id}/approve`, { method: "PATCH" });
+        const result = await response.json();
+        if (!response.ok) {
+          setStatus(result.message || "Failed to approve provider.", "error");
+          return;
+        }
+        setStatus("Provider approved successfully.", "success");
+        loadPending();
+        loadAllProviders();
+      } catch {
+        setStatus("Unable to approve provider.", "error");
+      }
+    };
+
+    const rejectProvider = async (id) => {
+      try {
+        const response = await fetch(`/api/admin/providers/${id}/reject`, { method: "PATCH" });
+        const result = await response.json();
+        if (!response.ok) {
+          setStatus(result.message || "Failed to reject provider.", "error");
+          return;
+        }
+        setStatus("Provider rejected successfully.", "success");
+        loadPending();
+        loadAllProviders();
+      } catch {
+        setStatus("Unable to reject provider.", "error");
+      }
+    };
+
+    const deleteProvider = async (id) => {
+      const ok = window.confirm("This will permanently delete provider profile and related bookings. Continue?");
+      if (!ok) return;
+      try {
+        const response = await fetch(`/api/admin/providers/${id}`, { method: "DELETE" });
+        const result = await response.json();
+        if (!response.ok) {
+          setStatus(result.message || "Failed to delete provider profile.", "error");
+          return;
+        }
+        setStatus("Provider profile deleted permanently.", "success");
+        loadPending();
+        loadAllProviders();
+      } catch {
+        setStatus("Unable to delete provider profile.", "error");
+      }
+    };
+
+    loadPending();
+    loadAllProviders();
+  </script>
+  <script src="logout.js"></script>
+</body>
+</html>

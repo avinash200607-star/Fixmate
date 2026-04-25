@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provider Profile | FixMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="provider-view.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">FM</span>
+        <span class="logo-text">FixMate</span>
+      </a>
+
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="providers.html">Browse Providers</a>
+        <a href="index.html#about">About</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="location-btn" type="button"><i class="fa-solid fa-location-dot"></i> New Delhi</button>
+        <a class="btn btn-light" href="auth.html">Login</a>
+        <a class="btn btn-primary" href="auth.html">Become a Provider</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="provider-view-main">
+    <div class="container">
+      <a href="providers.html" class="back-link">
+        <i class="fa-solid fa-chevron-left"></i> Back to Providers
+      </a>
+
+      <div class="profile-loading">
+        <i class="fa-solid fa-spinner fa-spin"></i> Loading provider profile...
+      </div>
+
+      <div class="profile-container hidden">
+        <!-- Header Section -->
+        <div class="profile-header">
+          <div class="profile-image-large">
+            <img id="profile-main-image" src="" alt="Provider profile" />
+          </div>
+
+          <div class="profile-info-box">
+            <div class="profile-top">
+              <div>
+                <h1 id="provider-name"></h1>
+                <p id="provider-service" class="service-badge"></p>
+              </div>
+              <div class="rating">
+                <div class="stars">
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+                <span class="rating-value">4.8 (125 reviews)</span>
+              </div>
+            </div>
+
+            <div class="profile-stats">
+              <div class="stat">
+                <i class="fa-solid fa-briefcase"></i>
+                <div>
+                  <span id="provider-experience" class="stat-value"></span>
+                  <span class="stat-label">Years Experience</span>
+                </div>
+              </div>
+              <div class="stat">
+                <i class="fa-solid fa-map-pin"></i>
+                <div>
+                  <span id="provider-location" class="stat-value"></span>
+                  <span class="stat-label">Service Area</span>
+                </div>
+              </div>
+              <div class="stat">
+                <i class="fa-solid fa-check"></i>
+                <div>
+                  <span class="stat-value">150+</span>
+                  <span class="stat-label">Jobs Completed</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-price-section">
+              <span class="label">Starting Price:</span>
+              <span id="provider-pricing" class="price"></span>
+            </div>
+
+            <div class="profile-actions">
+              <button class="btn btn-primary btn-large" id="book-btn">Book This Service</button>
+              <button class="btn btn-light btn-large" id="contact-btn">Contact Provider</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- About Section -->
+        <section class="profile-section">
+          <h2>About</h2>
+          <div id="provider-description" class="about-text"></div>
+        </section>
+
+        <!-- Portfolio Section -->
+        <section class="profile-section">
+          <h2>Portfolio</h2>
+          <div id="portfolio-gallery" class="gallery">
+            <!-- Gallery items will be inserted here -->
+          </div>
+        </section>
+
+        <!-- Reviews Section -->
+        <section class="profile-section">
+          <h2>Customer Reviews</h2>
+          <div class="reviews-container">
+            <div class="review-card">
+              <div class="review-header">
+                <div class="reviewer-info">
+                  <div class="reviewer-avatar"><i class="fa-solid fa-user-circle"></i></div>
+                  <div>
+                    <h4 class="reviewer-name">Rajesh Kumar</h4>
+                    <p class="review-date">2 days ago</p>
+                  </div>
+                </div>
+                <div class="review-rating">
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                </div>
+              </div>
+              <h5 class="review-title">Excellent AC Repair Service!</h5>
+              <p class="review-text">Very professional and punctual. Fixed my AC in no time. Would definitely book again!</p>
+            </div>
+
+            <div class="review-card">
+              <div class="review-header">
+                <div class="reviewer-info">
+                  <div class="reviewer-avatar"><i class="fa-solid fa-user-circle"></i></div>
+                  <div>
+                    <h4 class="reviewer-name">Priya Singh</h4>
+                    <p class="review-date">1 week ago</p>
+                  </div>
+                </div>
+                <div class="review-rating">
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star"></i>
+                  <i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+              </div>
+              <h5 class="review-title">Good Service, Fair Price</h5>
+              <p class="review-text">Did exactly what was needed. Could have communicated a bit more, but overall satisfied.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Image Modal -->
+        <div id="image-modal" class="modal hidden">
+          <div class="modal-content">
+            <button class="modal-close" id="modal-close">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="modal-image" src="" alt="Full size portfolio image" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-wrap">
+      <div>
+        <h3>FixMate</h3>
+        <p>Premium home services with trusted professionals.</p>
+      </div>
+      <div class="footer-links">
+        <a href="index.html">Home</a>
+        <a href="providers.html">Browse Providers</a>
+        <a href="index.html#about">About</a>
+        <a href="auth.html">Login</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="provider-view.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>

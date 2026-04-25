@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMate | Login & Signup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="auth.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <main class="auth-page">
+    <section class="auth-card">
+      <div class="brand-block">
+        <a href="index.html" class="brand">FixMate</a>
+        <h1>Welcome to FixMate</h1>
+        <p>Login or create an account to book services or manage provider requests.</p>
+      </div>
+
+      <div class="switch-row">
+        <button type="button" class="tab-btn active" data-tab="login">Login</button>
+        <button type="button" class="tab-btn" data-tab="signup">Signup</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <div class="role-toggle">
+          <button type="button" class="role-btn active" data-role-target="login" data-role="user">User</button>
+          <button type="button" class="role-btn" data-role-target="login" data-role="provider">Service Provider</button>
+        </div>
+        <input type="hidden" id="login-role" value="user" />
+        
+        <!-- Google Sign-In Button -->
+        <div id="google-login-btn" class="google-signin-wrapper"></div>
+        
+        <!-- Divider -->
+        <div class="divider-row">
+          <span>OR</span>
+        </div>
+        
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" required />
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter password" required />
+        <p><a class="admin-link" href="forgot-password.html">Forgot password?</a></p>
+        <button type="submit" class="submit-btn">Login</button>
+      </form>
+
+      <form id="signup-form" class="auth-form hidden">
+        <div class="role-toggle">
+          <button type="button" class="role-btn active" data-role-target="signup" data-role="user">User</button>
+          <button type="button" class="role-btn" data-role-target="signup" data-role="provider">Service Provider</button>
+        </div>
+        <input type="hidden" id="signup-role" value="user" />
+        
+        <!-- Google Sign-In Button -->
+        <div id="google-signup-btn" class="google-signin-wrapper"></div>
+        
+        <!-- Divider -->
+        <div class="divider-row">
+          <span>OR</span>
+        </div>
+        
+        <label>Name</label>
+        <input type="text" id="signup-name" placeholder="Your full name" required />
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" required />
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Create password" required />
+        <div id="service-type-wrap" class="hidden">
+          <label>Service Type(s) <span class="required">*</span></label>
+          <div class="services-grid">
+            <label class="service-checkbox">
+              <input type="checkbox" value="AC Repair" /> AC Repair
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Cleaning" /> Cleaning
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Electrician" /> Electrician
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Plumbing" /> Plumbing
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Appliance Repair" /> Appliance Repair
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Carpentry" /> Carpentry
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Painting" /> Painting
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Pest Control" /> Pest Control
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Salon at Home" /> Salon at Home
+            </label>
+            <label class="service-checkbox">
+              <input type="checkbox" value="Packers & Movers" /> Packers & Movers
+            </label>
+          </div>
+          <input type="hidden" id="signup-service-type" />
+        </div>
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+
+      <p class="status" id="auth-status"></p>
+      <p><a class="admin-link" href="admin-login.html">Admin login</a></p>
+    </section>
+  </main>
+  <script src="auth.js"></script>
+</body>
+</html>

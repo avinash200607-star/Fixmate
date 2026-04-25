@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FixMate Provider Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="provider-profile.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-wrap">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">FM</span>
+        <span class="logo-text">FixMate</span>
+      </a>
+
+      <nav class="menu">
+        <a href="provider-dashboard.html">Dashboard</a>
+        <a href="provider-bookings.html">Bookings</a>
+        <a href="provider-profile.html" class="active">Profile</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="location-btn" type="button"><i class="fa-solid fa-location-dot"></i> New Delhi</button>
+        <a class="btn btn-light" href="auth.html">Login</a>
+        <a class="btn btn-primary" href="auth.html">Become a Provider</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="card form-card">
+      <div class="profile-header">
+        <div class="profile-header-content">
+          <h1>Provider Profile</h1>
+          <p>Create and update your professional profile.</p>
+        </div>
+        <div class="profile-avatar-section">
+          <img id="profile-avatar" src="" alt="Profile" class="profile-avatar" />
+          <div class="profile-info-badge">
+            <p id="profile-name"></p>
+            <p id="profile-email"></p>
+          </div>
+        </div>
+      </div>
+
+      <form id="provider-profile-form">
+        <label>Name</label>
+        <input id="name" name="name" type="text" required />
+
+        <label>Service Type(s) <span class="required">*</span></label>
+        <div class="services-grid">
+          <label class="service-checkbox">
+            <input type="checkbox" value="AC Repair" /> AC Repair
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Cleaning" /> Cleaning
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Electrician" /> Electrician
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Plumbing" /> Plumbing
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Appliance Repair" /> Appliance Repair
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Carpentry" /> Carpentry
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Painting" /> Painting
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Pest Control" /> Pest Control
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Salon at Home" /> Salon at Home
+          </label>
+          <label class="service-checkbox">
+            <input type="checkbox" value="Packers & Movers" /> Packers & Movers
+          </label>
+        </div>
+        <input type="hidden" id="serviceType" name="serviceType" />
+
+        <label>Experience (years)</label>
+        <input id="experience" name="experience" type="number" min="0" required />
+
+        <label>Pricing</label>
+        <input id="pricing" name="pricing" type="text" placeholder="e.g., Starting at Rs.499" required />
+
+        <label>Location</label>
+        <input id="location" name="location" type="text" required />
+
+        <label>Phone Number</label>
+        <input id="phoneNumber" name="phoneNumber" type="tel" placeholder="10-digit mobile number" pattern="[0-9]{10}" required />
+
+        <label>Description</label>
+        <textarea id="description" name="description" rows="4" required></textarea>
+
+        <label>Profile Picture</label>
+        <input id="profileImage" name="profileImage" type="file" accept="image/*" />
+
+        <label>Work Images (Portfolio)</label>
+        <input id="portfolioImages" name="portfolioImages" type="file" accept="image/*" multiple />
+
+        <button type="submit">Save Profile</button>
+      </form>
+
+      <p id="status" class="status"></p>
+      <a href="provider-dashboard.html" class="back-link">Back to Provider Dashboard</a>
+    </section>
+
+    <section class="card preview-card">
+      <h2>Profile Preview</h2>
+      <div id="profile-preview" class="profile-preview empty">No profile data yet.</div>
+    </section>
+  </main>
+
+  <script src="provider-profile.js"></script>
+  <script src="logout.js"></script>
+</body>
+</html>
