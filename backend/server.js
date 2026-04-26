@@ -21,10 +21,13 @@ const PORT = process.env.PORT || 3000;
 // Middleware Setup
 // ========================
 
-// CORS - Enable for production
+// ✅ FIXED CORS (IMPORTANT)
 app.use(
   cors({
-    origin: process.env.NODE_ENV === "production" ? process.env.FRONTEND_URL : "*",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL || "*"
+        : "*",
     credentials: true,
   })
 );
@@ -48,51 +51,65 @@ const upload = multer({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
     filename: (_req, file, cb) => {
       const ext = path.extname(file.originalname);
-      const name = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, "");
+      const name = path
+        .basename(file.originalname, ext)
+        .replace(/[^a-zA-Z0-9_-]/g, "");
       cb(null, `${Date.now()}-${name}${ext}`);
     },
   }),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
 });
 
 // ========================
 // API Routes
 // ========================
 
-// Config endpoint
 app.get("/api/config", (_req, res) => {
   res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null });
 });
 
-// Auth routes
 app.use("/api/auth", authRoutes);
-
-// Provider routes
 app.use("/api/providers", providersRoutes);
-
-// Bookings routes
 app.use("/api/bookings", bookingsRoutes);
-
-// Admin routes
 app.use("/api/admin", adminRoutes);
 
 // ========================
-// Frontend Page Routes
+// Frontend Routes
 // ========================
 
-app.get("/auth", (_req, res) => res.sendFile(path.join(publicDir, "auth.html")));
-app.get("/forgot-password", (_req, res) => res.sendFile(path.join(publicDir, "forgot-password.html")));
-app.get("/reset-password", (_req, res) => res.sendFile(path.join(publicDir, "reset-password.html")));
-app.get("/admin-login", (_req, res) => res.sendFile(path.join(publicDir, "admin-login.html")));
-app.get("/admin-panel", (_req, res) => res.sendFile(path.join(publicDir, "admin-panel.html")));
-app.get("/provider-dashboard", (_req, res) => res.sendFile(path.join(publicDir, "provider-dashboard.html")));
-app.get("/provider-profile", (_req, res) => res.sendFile(path.join(publicDir, "provider-profile.html")));
-app.get("/provider-bookings", (_req, res) => res.sendFile(path.join(publicDir, "provider-bookings.html")));
-app.get("/user-bookings", (_req, res) => res.sendFile(path.join(publicDir, "user-bookings.html")));
-app.get("/booking", (_req, res) => res.sendFile(path.join(publicDir, "booking.html")));
+app.get("/auth", (_req, res) =>
+  res.sendFile(path.join(publicDir, "auth.html"))
+);
+app.get("/forgot-password", (_req, res) =>
+  res.sendFile(path.join(publicDir, "forgot-password.html"))
+);
+app.get("/reset-password", (_req, res) =>
+  res.sendFile(path.join(publicDir, "reset-password.html"))
+);
+app.get("/admin-login", (_req, res) =>
+  res.sendFile(path.join(publicDir, "admin-login.html"))
+);
+app.get("/admin-panel", (_req, res) =>
+  res.sendFile(path.join(publicDir, "admin-panel.html"))
+);
+app.get("/provider-dashboard", (_req, res) =>
+  res.sendFile(path.join(publicDir, "provider-dashboard.html"))
+);
+app.get("/provider-profile", (_req, res) =>
+  res.sendFile(path.join(publicDir, "provider-profile.html"))
+);
+app.get("/provider-bookings", (_req, res) =>
+  res.sendFile(path.join(publicDir, "provider-bookings.html"))
+);
+app.get("/user-bookings", (_req, res) =>
+  res.sendFile(path.join(publicDir, "user-bookings.html"))
+);
+app.get("/booking", (_req, res) =>
+  res.sendFile(path.join(publicDir, "booking.html"))
+);
 
 // ========================
-// Error Handling Middleware
+// Error Handling
 // ========================
 
 app.use((err, _req, res, _next) => {
@@ -108,26 +125,28 @@ app.use((err, _req, res, _next) => {
     return res.status(err.status).json({ message: err.message });
   }
 
-  // Production error handling
-  const message = process.env.NODE_ENV === "production" ? "Internal server error" : err.message;
+  const message =
+    process.env.NODE_ENV === "production"
+      ? "Internal server error"
+      : err.message;
+
   res.status(500).json({ message });
 });
 
-// 404 handler
+// 404
 app.use((_req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 // ========================
-// Database Connection & Server Start
+// Start Server
 // ========================
 
 const startServer = async () => {
   try {
-    // Connect to MongoDB
     await connectDB();
 
-    // Ensure at least one admin user exists
+    // Create default admin if not exists
     const adminUser = await User.findOne({ role: "admin" });
     if (!adminUser) {
       const hash = await bcrypt.hash("admin123", 10);
@@ -137,15 +156,11 @@ const startServer = async () => {
         password: hash,
         role: "admin",
       });
-      console.log("✓ Default admin user created (email: admin@fixmate.com, password: admin123)");
+      console.log("✓ Default admin created");
     }
 
-    // Start server
     app.listen(PORT, () => {
-      console.log(
-        `✓ FixMate server running on ${process.env.NODE_ENV === "production" ? "production" : "development"}`
-      );
-      console.log(`✓ Server listening at http://localhost:${PORT}`);
+      console.log(`✓ Server running on port ${PORT}`);
     });
   } catch (error) {
     console.error("✗ Failed to start server:", error.message);
