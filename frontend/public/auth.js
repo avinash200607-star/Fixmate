@@ -1,7 +1,5 @@
-// API Configuration
-const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000/api'
-  : window.location.protocol + '//' + window.location.host + '/api';
+// ✅ FIXED API URL (IMPORTANT)
+const API_URL = "https://fixmate-1-v9cf.onrender.com/api";
 
 const tabButtons = document.querySelectorAll(".tab-btn");
 const loginForm = document.getElementById("login-form");
@@ -10,304 +8,193 @@ const statusText = document.getElementById("auth-status");
 const loginRoleInput = document.getElementById("login-role");
 const signupRoleInput = document.getElementById("signup-role");
 const serviceTypeWrap = document.getElementById("service-type-wrap");
-const serviceTypeInput = document.getElementById("signup-service-type");
 
 const googleLoginWrap = document.getElementById("google-login-btn");
 const googleSignupWrap = document.getElementById("google-signup-btn");
 let activeAuthTab = "login";
 
-const setGoogleVisibility = (visible) => {
-  if (!googleLoginWrap || !googleSignupWrap) return;
-  googleLoginWrap.classList.toggle("hidden", !visible);
-  googleSignupWrap.classList.toggle("hidden", !visible);
+const setStatus = (msg, type = "") => {
+  statusText.textContent = msg;
+  statusText.className = `status ${type}`;
 };
 
-const getRedirectTarget = () => {
-  const params = new URLSearchParams(window.location.search);
-  const next = params.get("next");
-  if (!next) return "";
-  // only allow same-origin relative redirects
-  if (next.startsWith("/") || /^[a-zA-Z0-9_\-./]+$/.test(next)) {
-    return next.startsWith("/") ? next : `/${next}`;
-  }
-  return "";
-};
+// ========================
+// TAB SWITCH
+// ========================
+tabButtons.forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+    activeAuthTab = tab;
 
-const redirectAfterLogin = (user) => {
-  const next = getRedirectTarget();
-  if (next) {
-    window.location.href = next;
-    return;
-  }
+    tabButtons.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
 
-  if (user?.role === "provider") {
-    window.location.href = "/provider-dashboard.html";
-    return;
-  }
-
-  if (user?.role === "admin") {
-    window.location.href = "/admin-panel";
-    return;
-  }
-
-  window.location.href = "/index.html";
-};
-
-const setStatus = (message, type = "") => {
-  statusText.textContent = message;
-  statusText.className = `status ${type}`.trim();
-};
-
-const switchTab = (targetTab) => {
-  activeAuthTab = targetTab;
-  tabButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.tab === targetTab);
+    loginForm.classList.toggle("hidden", tab !== "login");
+    signupForm.classList.toggle("hidden", tab !== "signup");
   });
-  loginForm.classList.toggle("hidden", targetTab !== "login");
-  signupForm.classList.toggle("hidden", targetTab !== "signup");
-  setStatus("");
-};
-
-tabButtons.forEach((button) => {
-  button.addEventListener("click", () => switchTab(button.dataset.tab));
 });
 
-// Get selected services
-const getSelectedServices = () => {
-  const checkboxes = document.querySelectorAll('#service-type-wrap input[type="checkbox"]:checked');
-  return Array.from(checkboxes).map((cb) => cb.value);
-};
+// ========================
+// ROLE SWITCH
+// ========================
+document.querySelectorAll(".role-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.roleTarget;
+    const role = btn.dataset.role;
 
-document.querySelectorAll(".role-btn").forEach((button) => {
-  button.addEventListener("click", () => {
-    const target = button.dataset.roleTarget;
-    const role = button.dataset.role;
-    const roleButtons = document.querySelectorAll(`.role-btn[data-role-target="${target}"]`);
+    document.querySelectorAll(`.role-btn[data-role-target="${target}"]`)
+      .forEach(b => b.classList.remove("active"));
 
-    roleButtons.forEach((item) => item.classList.toggle("active", item === button));
+    btn.classList.add("active");
 
     if (target === "login") {
       loginRoleInput.value = role;
-      return;
+    } else {
+      signupRoleInput.value = role;
+      serviceTypeWrap.classList.toggle("hidden", role !== "provider");
     }
-
-    signupRoleInput.value = role;
-    const isProvider = role === "provider";
-    serviceTypeWrap.classList.toggle("hidden", !isProvider);
   });
 });
 
-signupForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  
-  const role = signupRoleInput.value;
-  let selectedServices = [];
-  
-  if (role === "provider") {
-    selectedServices = getSelectedServices();
-    if (selectedServices.length === 0) {
-      setStatus("Please select at least one service type.", "error");
-      return;
-    }
-  }
-  
+// ========================
+// SIGNUP
+// ========================
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
   setStatus("Creating account...");
 
   const payload = {
-    name: document.getElementById("signup-name").value.trim(),
-    email: document.getElementById("signup-email").value.trim(),
+    name: document.getElementById("signup-name").value,
+    email: document.getElementById("signup-email").value,
     password: document.getElementById("signup-password").value,
-    role: role,
-    serviceTypes: selectedServices,
+    role: signupRoleInput.value,
   };
 
   try {
-    const response = await fetch(`${API_URL}/auth/signup`, {
+    const res = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
     });
-    let result = null;
-    try {
-      result = await response.json();
-    } catch {
-      result = null;
-    }
 
-    if (!response.ok) {
-      setStatus(result?.message || "Signup failed. Please try again.", "error");
+    const data = await res.json();
+
+    if (!res.ok) {
+      setStatus(data.message || "Signup failed", "error");
       return;
     }
 
-    setStatus("Account created successfully. Please login.", "success");
+    setStatus("Signup successful! Please login.", "success");
     signupForm.reset();
-    // Uncheck all checkboxes
-    document.querySelectorAll('#service-type-wrap input[type="checkbox"]').forEach((cb) => (cb.checked = false));
-    serviceTypeWrap.classList.add("hidden");
-    signupRoleInput.value = "user";
-    document.querySelectorAll('.role-btn[data-role-target="signup"]').forEach((button) => {
-      button.classList.toggle("active", button.dataset.role === "user");
-    });
-    switchTab("login");
-  } catch (error) {
-    const isLikelyOffline =
-      window.location.protocol === "file:" ||
-      String(error?.message || "").toLowerCase().includes("failed to fetch");
-
-    setStatus(
-      isLikelyOffline
-        ? "Server not reachable. Start the server (npm start) and open http://localhost:3000/auth"
-        : "Unable to create account. Try again.",
-      "error"
-    );
+  } catch (err) {
+    setStatus("Server error. Try again.", "error");
   }
 });
 
-loginForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
+// ========================
+// LOGIN
+// ========================
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
   setStatus("Logging in...");
 
   const payload = {
-    email: document.getElementById("login-email").value.trim(),
+    email: document.getElementById("login-email").value,
     password: document.getElementById("login-password").value,
     role: loginRoleInput.value,
   };
 
   try {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const res = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
     });
-    let result = null;
-    try {
-      result = await response.json();
-    } catch {
-      result = null;
-    }
 
-    if (!response.ok) {
-      setStatus(result?.message || "Login failed.", "error");
+    const data = await res.json();
+
+    if (!res.ok) {
+      setStatus(data.message || "Login failed", "error");
       return;
     }
 
-    const userData = {
-      ...result.user,
-      profilePicture: result.user.profilePicture || null,
-    };
-    localStorage.setItem("fixmateUser", JSON.stringify(userData));
-    setStatus("Login successful. Redirecting...", "success");
-    redirectAfterLogin(result.user);
-  } catch (error) {
-    const isLikelyOffline =
-      window.location.protocol === "file:" ||
-      String(error?.message || "").toLowerCase().includes("failed to fetch");
+    localStorage.setItem("fixmateUser", JSON.stringify(data.user));
+    setStatus("Login successful!", "success");
 
-    setStatus(
-      isLikelyOffline
-        ? "Server not reachable. Start the server (npm start) and open http://localhost:3000/auth"
-        : "Unable to login. Try again.",
-      "error"
-    );
+    window.location.href = "/index.html";
+
+  } catch (err) {
+    setStatus("Server error. Try again.", "error");
   }
 });
 
-// Google OAuth Handler
-const handleGoogleSignInSuccess = async (response) => {
-  setStatus("Processing Google authentication...");
+// ========================
+// GOOGLE LOGIN
+// ========================
+async function handleGoogleSignInSuccess(response) {
+  setStatus("Processing Google login...");
 
   try {
-    const isSignup = activeAuthTab === "signup";
-    const role = isSignup ? signupRoleInput.value : loginRoleInput.value;
-
-    let selectedServices = [];
-    if (isSignup && role === "provider") {
-      selectedServices = getSelectedServices();
-      if (selectedServices.length === 0) {
-        setStatus("Please select at least one service type.", "error");
-        return;
-      }
-    }
-
-    const backendResponse = await fetch("/api/auth/google", {
+    const res = await fetch(`${API_URL}/auth/google`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         token: response.credential,
-        role,
-        serviceTypes: selectedServices,
-      }),
+        role: activeAuthTab === "signup" ? signupRoleInput.value : loginRoleInput.value
+      })
     });
 
-    const result = await backendResponse.json();
+    const data = await res.json();
 
-    if (!backendResponse.ok) {
-      setStatus(result.message || "Google authentication failed.", "error");
+    if (!res.ok) {
+      setStatus(data.message || "Google login failed", "error");
       return;
     }
 
-    // Store user data with profile picture
-    const userData = {
-      ...result.user,
-      profilePicture: result.user.profilePicture || null,
-    };
-    localStorage.setItem("fixmateUser", JSON.stringify(userData));
-    setStatus("Authentication successful. Redirecting...", "success");
-    redirectAfterLogin(result.user);
-  } catch (error) {
-    console.error("Google authentication error:", error);
-    setStatus("Authentication failed. Please try again.", "error");
+    localStorage.setItem("fixmateUser", JSON.stringify(data.user));
+    setStatus("Login successful!", "success");
+
+    window.location.href = "/index.html";
+
+  } catch (err) {
+    setStatus("Google login error", "error");
+  }
+}
+
+// ========================
+// INIT GOOGLE
+// ========================
+window.onload = async () => {
+  try {
+    const res = await fetch(`${API_URL}/config`);
+    const config = await res.json();
+
+    if (!config.googleClientId) return;
+
+    google.accounts.id.initialize({
+      client_id: config.googleClientId,
+      callback: handleGoogleSignInSuccess
+    });
+
+    google.accounts.id.renderButton(googleLoginWrap, {
+      theme: "outline",
+      size: "large"
+    });
+
+    google.accounts.id.renderButton(googleSignupWrap, {
+      theme: "outline",
+      size: "large"
+    });
+
+  } catch (err) {
+    console.log("Google init failed");
   }
 };
-
-const handleGoogleSignInError = () => {
-  setStatus("Google Sign-In failed. Please try again.", "error");
-};
-
-// Initialize Google Sign-In buttons when page loads
-window.addEventListener("load", () => {
-  (async () => {
-    try {
-      const response = await fetch("/api/config");
-      const config = await response.json();
-      const googleClientId = config?.googleClientId;
-
-      if (!googleClientId) {
-        setGoogleVisibility(false);
-        // Keep UI clean when OAuth isn't configured
-        return;
-      }
-
-      if (!window.google?.accounts?.id) {
-        setGoogleVisibility(false);
-        setStatus("Google Sign-In failed to load. Please refresh.", "error");
-        return;
-      }
-
-      google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: handleGoogleSignInSuccess,
-      });
-
-      setGoogleVisibility(true);
-
-      // Render login button
-      google.accounts.id.renderButton(googleLoginWrap, {
-        theme: "outline",
-        size: "large",
-        width: "100%",
-        text: "continue_with",
-      });
-
-      // Render signup button
-      google.accounts.id.renderButton(googleSignupWrap, {
-        theme: "outline",
-        size: "large",
-        width: "100%",
-        text: "signup_with",
-      });
-    } catch (error) {
-      setGoogleVisibility(false);
-    }
-  })();
-});
