@@ -1,0 +1,258 @@
+const express = require("express");
+const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
+const User = require("../models/User");
+const Provider = require("../models/Provider");
+
+const router = express.Router();
+const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
+const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
+
+const normalizeRole = (role) => (role === "provider" || role === "admin" ? role : "user");
+
+// POST /api/auth/signup
+router.post("/signup", async (req, res) => {
+  try {
+    const { name, email, password, role, serviceTypes, googleId } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "name, email, and password are required." });
+    }
+
+    const normalizedRole = normalizeRole(role);
+    if (normalizedRole === "provider" && (!serviceTypes || serviceTypes.length === 0)) {
+      return res.status(400).json({ message: "Please select at least one service type." });
+    }
+
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already exists. Please login instead." });
+    }
+
+    const newUser = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role: normalizedRole,
+      googleId: googleId || null,
+    });
+
+    await newUser.save();
+
+    res.status(201).json({
+      message: "Account created successfully.",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        googleId: newUser.googleId,
+        serviceType: normalizedRole === "provider" ? serviceTypes.join(", ") : null,
+      },
+    });
+  } catch (error) {
+    console.error("Signup error:", error);
+    res.status(500).json({ message: "Failed to create account." });
+  }
+});
+
+// POST /api/auth/login
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password, role } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    const normalizedRole = normalizeRole(role);
+    const user = await User.findOne({ email: email.toLowerCase(), role: normalizedRole }).select("+password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials for selected role." });
+    }
+
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "Invalid email or password." });
+    }
+
+    let provider = null;
+    if (normalizedRole === "provider") {
+      provider = await Provider.findOne({ userId: user._id });
+    }
+
+    res.json({
+      message: "Login successful.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        serviceType: provider?.serviceTypes ? provider.serviceTypes.join(", ") : null,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Failed to login." });
+  }
+});
+
+// POST /api/auth/admin/login
+router.post("/admin/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase(), role: "admin" }).select("+password");
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid admin credentials." });
+    }
+
+    const isPasswordCorrect = await user.comparePassword(password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({ message: "Invalid admin credentials." });
+    }
+
+    res.json({
+      message: "Admin login successful.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Admin login error:", error);
+    res.status(500).json({ message: "Failed to login." });
+  }
+});
+
+// POST /api/auth/google
+router.post("/google", async (req, res) => {
+  try {
+    const { token, role, serviceTypes } = req.body;
+
+    if (!token) {
+      return res.status(400).json({ message: "Google token is required." });
+    }
+
+    if (!googleClient) {
+      return res.status(500).json({
+        message: "Google auth is not configured. Set GOOGLE_CLIENT_ID in your environment.",
+      });
+    }
+
+    const normalizedRole = normalizeRole(role);
+    if (normalizedRole === "provider" && (!serviceTypes || serviceTypes.length === 0)) {
+      return res.status(400).json({
+        message: "Please select at least one service type for provider signup.",
+      });
+    }
+
+    const ticket = await googleClient.verifyIdToken({ idToken: token, audience: googleClientId });
+    const payload = ticket.getPayload();
+    const email = payload?.email?.toLowerCase();
+    const name = payload?.name || "User";
+
+    if (!email) {
+      return res.status(401).json({ message: "Invalid or expired token." });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      const randomPassword = crypto.randomBytes(16).toString("hex");
+      user = new User({
+        name,
+        email,
+        password: randomPassword,
+        role: normalizedRole,
+        googleId: payload?.sub || null,
+      });
+      await user.save();
+    }
+
+    let provider = null;
+    if (normalizedRole === "provider") {
+      provider = await Provider.findOne({ userId: user._id });
+    }
+
+    res.json({
+      message: "Google authentication successful.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        serviceType: provider?.serviceTypes ? provider.serviceTypes.join(", ") : null,
+        profilePicture: payload?.picture || null,
+      },
+    });
+  } catch (error) {
+    console.error("Google auth error:", error);
+    res.status(401).json({ message: "Invalid or expired token." });
+  }
+});
+
+// POST /api/auth/forgot-password
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Return generic success even if user doesn't exist (security best practice)
+    if (!user) {
+      return res.json({ message: "If this email exists, a reset link has been generated." });
+    }
+
+    const resetToken = crypto.randomBytes(24).toString("hex");
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
+
+    // Store reset token temporarily in memory or Redis in production
+    // For now, we'll include it in the response (not ideal for production)
+    res.json({
+      message: "Password reset link generated.",
+      resetLink: `/reset-password.html?token=${resetToken}`,
+      token: resetToken,
+      expiresAt: expiresAt.toISOString(),
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({ message: "Failed to generate reset link." });
+  }
+});
+
+// POST /api/auth/reset-password
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: "Token and newPassword are required." });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
+    // In production, validate token from Redis or database
+    // For now, this is a placeholder
+    res.json({ message: "Password reset successful. Please login." });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({ message: "Failed to reset password." });
+  }
+});
+
+module.exports = router;

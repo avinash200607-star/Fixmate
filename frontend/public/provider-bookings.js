@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 let allBookings = [];
 let currentProvider = null;
 let currentFilter = "all";
@@ -33,7 +38,7 @@ const loadBookings = async () => {
   if (!currentProvider) return;
 
   try {
-    const response = await fetch(`/api/bookings/provider/${currentProvider.id}`);
+    const response = await fetch(`${API_URL}/bookings/provider/${currentProvider.id}`);
     if (!response.ok) throw new Error("Failed to fetch bookings");
 
     allBookings = await response.json();
@@ -104,16 +109,21 @@ const createBookingCard = (booking) => {
     day: "numeric",
   });
 
+  const normalizedStatus = {
+    accepted: "confirmed",
+    rejected: "cancelled",
+  }[booking.status] || booking.status;
+
   const statusColor = {
     pending: "status-pending",
     confirmed: "status-confirmed",
     completed: "status-completed",
     cancelled: "status-cancelled",
-  }[booking.status] || "status-pending";
+  }[normalizedStatus] || "status-pending";
 
   let actionButtons = "";
 
-  if (booking.status === "pending") {
+  if (normalizedStatus === "pending") {
     actionButtons = `
       <button class="btn-action btn-accept" data-booking-id="${booking.id}">
         <i class="fa-solid fa-check"></i> Accept
@@ -122,7 +132,7 @@ const createBookingCard = (booking) => {
         <i class="fa-solid fa-times"></i> Reject
       </button>
     `;
-  } else if (booking.status === "confirmed") {
+  } else if (normalizedStatus === "confirmed") {
     actionButtons = `
       <button class="btn-action btn-complete" data-booking-id="${booking.id}">
         <i class="fa-solid fa-check-double"></i> Mark Complete
@@ -137,7 +147,7 @@ const createBookingCard = (booking) => {
           <h3>${escapeHtml(booking.service_type)}</h3>
           <p class="booking-id">Booking #${String(booking.id).padStart(6, "0")}</p>
         </div>
-        <span class="status-badge ${statusColor}">${booking.status}</span>
+        <span class="status-badge ${statusColor}">${normalizedStatus}</span>
       </div>
 
       <div class="booking-card-body">
@@ -192,7 +202,7 @@ const createBookingCard = (booking) => {
 // Update booking status
 const updateBookingStatus = async (bookingId, newStatus) => {
   try {
-    const response = await fetch(`/api/bookings/${bookingId}`, {
+    const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),

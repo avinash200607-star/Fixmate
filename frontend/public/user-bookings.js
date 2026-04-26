@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 let allBookings = [];
 let currentUser = null;
 let currentFilter = "all";
@@ -38,7 +43,7 @@ const loadBookings = async () => {
   if (!currentUser) return;
 
   try {
-    const response = await fetch(`/api/bookings/user/${currentUser.id}`);
+    const response = await fetch(`${API_URL}/bookings/user/${currentUser.id}`);
     if (!response.ok) throw new Error("Failed to fetch bookings");
 
     allBookings = await response.json();

@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 const form = document.getElementById("reset-form");
 const statusEl = document.getElementById("reset-status");
 
@@ -29,7 +34,7 @@ form.addEventListener("submit", async (event) => {
 
   setStatus("Resetting password...");
   try {
-    const response = await fetch("/api/auth/reset-password", {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, newPassword }),

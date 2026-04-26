@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 // Get provider ID from URL
 const params = new URLSearchParams(window.location.search);
 const providerId = params.get("id");
@@ -42,7 +47,7 @@ async function loadProviderProfile() {
   }
 
   try {
-    const response = await fetch(`/api/providers/${providerId}`);
+    const response = await fetch(`${API_URL}/providers/${providerId}`);
     if (!response.ok) {
       throw new Error("Provider not found");
     }

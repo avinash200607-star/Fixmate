@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 const adminForm = document.getElementById("admin-login-form");
 const adminStatus = document.getElementById("admin-status");
 
@@ -17,7 +22,7 @@ if (adminForm) {
     };
 
     try {
-      const response = await fetch("/api/auth/admin/login", {
+      const response = await fetch(`${API_URL}/auth/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

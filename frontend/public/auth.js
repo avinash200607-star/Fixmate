@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 const tabButtons = document.querySelectorAll(".tab-btn");
 const loginForm = document.getElementById("login-form");
 const signupForm = document.getElementById("signup-form");
@@ -117,7 +122,7 @@ signupForm.addEventListener("submit", async (event) => {
   };
 
   try {
-    const response = await fetch("/api/auth/signup", {
+    const response = await fetch(`${API_URL}/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -169,7 +174,7 @@ loginForm.addEventListener("submit", async (event) => {
   };
 
   try {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 const form = document.getElementById("provider-profile-form");
 const statusEl = document.getElementById("status");
 const previewEl = document.getElementById("profile-preview");
@@ -98,7 +103,7 @@ const fillForm = (profile) => {
 
 const loadProfile = async () => {
   try {
-    const res = await fetch(`/api/provider/profile/${user.id}`);
+    const res = await fetch(`${API_URL}/provider/profile/${user.id}`);
     if (!res.ok) {
       renderProfile(null);
       return;
@@ -143,7 +148,7 @@ form.addEventListener("submit", async (event) => {
   }
 
   try {
-    const res = await fetch("/api/provider/profile", {
+    const res = await fetch(`${API_URL}/provider/profile`, {
       method: "POST",
       body: formData,
     });

@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 let allProviders = [];
 let currentFilter = "all";
 
@@ -44,7 +49,7 @@ filterButtons.forEach((btn) => {
 // Fetch all providers from backend
 async function fetchProviders() {
   try {
-    const response = await fetch("/api/providers");
+    const response = await fetch(`${API_URL}/providers`);
     if (!response.ok) throw new Error("Failed to fetch providers");
     allProviders = await response.json();
     

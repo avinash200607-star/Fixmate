@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 const form = document.getElementById("forgot-form");
 const statusEl = document.getElementById("forgot-status");
 
@@ -12,7 +17,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     const email = document.getElementById("forgot-email").value.trim();
-    const response = await fetch("/api/auth/forgot-password", {
+    const response = await fetch(`${API_URL}/auth/forgot-password`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),

@@ -1,3 +1,8 @@
+// API Configuration
+const API_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000/api'
+  : window.location.protocol + '//' + window.location.host + '/api';
+
 // Get URL parameters
 const params = new URLSearchParams(window.location.search);
 const providerId = params.get("provider_id");
@@ -9,6 +14,7 @@ let currentUser = null;
 const form = document.getElementById("booking-form");
 const statusEl = document.getElementById("status");
 const confirmationModal = document.getElementById("confirmation-modal");
+const phoneInput = document.getElementById("phone-number");
 
 // Check if user is logged in
 const checkAuth = () => {
@@ -23,6 +29,13 @@ const checkAuth = () => {
 // Initialize
 currentUser = checkAuth();
 
+if (phoneInput) {
+  phoneInput.addEventListener("input", () => {
+    // Keep only digits and enforce 10-digit mobile number.
+    phoneInput.value = phoneInput.value.replace(/\D/g, "").slice(0, 10);
+  });
+}
+
 // Load provider data
 const loadProvider = async () => {
   if (!providerId) {
@@ -31,7 +44,7 @@ const loadProvider = async () => {
   }
 
   try {
-    const response = await fetch(`/api/providers/${providerId}`);
+    const response = await fetch(`${API_URL}/providers/${providerId}`);
     if (!response.ok) throw new Error("Provider not found");
     
     providerData = await response.json();
@@ -204,7 +217,7 @@ form.addEventListener("submit", async (event) => {
   };
 
   try {
-    const response = await fetch("/api/bookings", {
+    const response = await fetch(`${API_URL}/bookings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(bookingData),
