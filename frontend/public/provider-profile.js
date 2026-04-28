@@ -61,11 +61,17 @@ const renderProfile = (profile) => {
     return;
   }
 
+  // Build portfolio image HTML with full URLs
   const portfolio = (profile.portfolioImages || [])
-    .map(
-      (img) =>
-        `<article class="portfolio-card"><img src="${escapeHtml(img)}" alt="Work sample" /></article>`
-    )
+    .map((img) => {
+      let imageSrc = img;
+      if (img.startsWith("/uploads/")) {
+        imageSrc = `${window.location.protocol}//${window.location.host}${img}`;
+      } else if (img.startsWith("/")) {
+        imageSrc = `${window.location.protocol}//${window.location.host}${img}`;
+      }
+      return `<article class="portfolio-card"><img src="${escapeHtml(imageSrc)}" alt="Work sample" onerror="this.src='https://via.placeholder.com/150x150?text=Portfolio'" /></article>`;
+    })
     .join("");
 
   const profileImageUrl = profile.profileImage || profile.profile_image || "https://via.placeholder.com/90x90?text=FM";
@@ -79,6 +85,7 @@ const renderProfile = (profile) => {
   }
   
   console.log("Image URL:", profileImageUrl, "Final src:", imageSrc);
+  console.log("Portfolio images:", profile.portfolioImages);
 
   previewEl.className = "profile-preview";
   previewEl.innerHTML = `

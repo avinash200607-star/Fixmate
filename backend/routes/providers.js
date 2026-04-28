@@ -67,6 +67,12 @@ router.post("/profile", (req, res, next) => {
       profileImageUrl = `/uploads/${req.files.profileImage[0].filename}`;
     }
 
+    // Build portfolio image URLs if files were uploaded
+    let portfolioImageUrls = [];
+    if (req.files && req.files.portfolioImages) {
+      portfolioImageUrls = req.files.portfolioImages.map(file => `/uploads/${file.filename}`);
+    }
+
     let provider = await Provider.findOne({ userId });
 
     if (provider) {
@@ -77,6 +83,10 @@ router.post("/profile", (req, res, next) => {
       provider.phoneNumber = phoneNumber || provider.phoneNumber;
       if (profileImageUrl) {
         provider.profileImage = profileImageUrl;
+      }
+      // Add new portfolio images to existing ones
+      if (portfolioImageUrls.length > 0) {
+        provider.portfolioImages = [...(provider.portfolioImages || []), ...portfolioImageUrls];
       }
       provider.description = description || provider.description;
       provider.approved = true;
@@ -91,6 +101,7 @@ router.post("/profile", (req, res, next) => {
         location,
         phoneNumber: phoneNumber || "",
         profileImage: profileImageUrl || null,
+        portfolioImages: portfolioImageUrls,
         description: description || "Experienced service provider.",
         approved: true,
         reviewStatus: "approved",
@@ -120,6 +131,12 @@ router.get("/profile/:userId", async (req, res) => {
 
     const user = await User.findById(req.params.userId);
 
+    // Convert portfolio image paths to full URLs if needed
+    const portfolioImages = (provider.portfolioImages || []).map(img => {
+      if (img.startsWith("http")) return img;
+      return img; // Already relative path, frontend will convert to full URL
+    });
+
     res.json({
       profile: {
         providerId: provider._id,
@@ -132,7 +149,7 @@ router.get("/profile/:userId", async (req, res) => {
         phoneNumber: provider.phoneNumber || "",
         description: provider.description || "",
         profileImage: provider.profileImage || null,
-        portfolioImages: provider.portfolioImages || [],
+        portfolioImages: portfolioImages,
       },
     });
   } catch (error) {

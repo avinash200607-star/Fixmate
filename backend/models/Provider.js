@@ -38,6 +38,10 @@ const providerSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    portfolioImages: {
+      type: [String],
+      default: [],
+    },
     approved: {
       type: Boolean,
       default: false,
