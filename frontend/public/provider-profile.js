@@ -103,7 +103,7 @@ const fillForm = (profile) => {
 
 const loadProfile = async () => {
   try {
-    const res = await fetch(`${API_URL}/provider/profile/${user.id}`);
+    const res = await fetch(`${API_URL}/providers/profile/${user.id}`);
     if (!res.ok) {
       renderProfile(null);
       return;
@@ -127,30 +127,22 @@ form.addEventListener("submit", async (event) => {
   
   setStatus("Saving profile...");
 
-  const formData = new FormData();
-  formData.append("providerId", user.id);
-  formData.append("name", document.getElementById("name").value.trim());
-  formData.append("serviceType", selectedServices.join(", "));
-  formData.append("experience", document.getElementById("experience").value.trim());
-  formData.append("pricing", document.getElementById("pricing").value.trim());
-  formData.append("location", document.getElementById("location").value.trim());
-  formData.append("phoneNumber", document.getElementById("phoneNumber").value.trim());
-  formData.append("description", document.getElementById("description").value.trim());
-
-  const profileImage = document.getElementById("profileImage").files[0];
-  if (profileImage) {
-    formData.append("profileImage", profileImage);
-  }
-
-  const portfolioFiles = document.getElementById("portfolioImages").files;
-  for (const file of portfolioFiles) {
-    formData.append("portfolioImages", file);
-  }
+  const payload = {
+    userId: user.id,
+    serviceTypes: selectedServices,
+    experience: document.getElementById("experience").value.trim(),
+    price: document.getElementById("pricing").value.trim(),
+    location: document.getElementById("location").value.trim(),
+    phoneNumber: document.getElementById("phoneNumber").value.trim(),
+    description: document.getElementById("description").value.trim(),
+    profileImage: null,
+  };
 
   try {
-    const res = await fetch(`${API_URL}/provider/profile`, {
+    const res = await fetch(`${API_URL}/providers/profile`, {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
     const result = await res.json();
 
@@ -161,8 +153,6 @@ form.addEventListener("submit", async (event) => {
 
     setStatus("Profile saved successfully.", "success");
     await loadProfile();
-    document.getElementById("profileImage").value = "";
-    document.getElementById("portfolioImages").value = "";
   } catch {
     setStatus("Unable to save profile.", "error");
   }
