@@ -64,11 +64,21 @@ signupForm.addEventListener("submit", async (e) => {
 
   setStatus("Creating account...");
 
+  const role = signupRoleInput.value;
+  
+  // Collect selected services if provider
+  let serviceTypes = [];
+  if (role === "provider") {
+    const checkboxes = document.querySelectorAll("#service-type-wrap input[type='checkbox']:checked");
+    serviceTypes = Array.from(checkboxes).map(cb => cb.value);
+  }
+
   const payload = {
     name: document.getElementById("signup-name").value,
     email: document.getElementById("signup-email").value,
     password: document.getElementById("signup-password").value,
-    role: signupRoleInput.value,
+    role: role,
+    serviceTypes: serviceTypes,
   };
 
   try {
