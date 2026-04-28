@@ -4,6 +4,8 @@ const Provider = require("../models/Provider");
 
 const router = express.Router();
 
+// Multer will be passed from server.js as middleware
+
 const parsePricingToNumber = (value) => {
   const raw = String(value || "").trim();
   if (!raw) return 0;
@@ -27,9 +29,24 @@ const providerToFrontend = (provider, user) => ({
 });
 
 // POST /api/providers/profile (Save/Update provider profile)
-router.post("/profile", async (req, res) => {
+// Note: This route expects FormData with optional file uploads
+router.post("/profile", (req, res, next) => {
+  // If there's a file, the upload middleware should be applied
+  if (req.body.profileImage === "undefined" || req.body.profileImage === null) {
+    delete req.body.profileImage;
+  }
+  next();
+}, async (req, res) => {
   try {
-    const { userId, serviceTypes, experience, price, location, phoneNumber, description, profileImage } = req.body;
+    let { userId, serviceTypes, experience, pricing, location, phoneNumber, description } = req.body;
+    
+    // Support both "pricing" and "price" field names
+    const price = pricing || req.body.price;
+
+    // Parse serviceTypes if it comes as string
+    if (typeof serviceTypes === "string") {
+      serviceTypes = serviceTypes.split(",").map(s => s.trim()).filter(s => s);
+    }
 
     if (!userId || !serviceTypes || serviceTypes.length === 0 || !location) {
       return res.status(400).json({ message: "userId, serviceTypes, and location are required." });
@@ -44,6 +61,12 @@ router.post("/profile", async (req, res) => {
       return res.status(403).json({ message: "Only provider users can create profiles." });
     }
 
+    // Build profile image URL if file was uploaded
+    let profileImageUrl = null;
+    if (req.files && req.files.profileImage) {
+      profileImageUrl = `/uploads/${req.files.profileImage[0].filename}`;
+    }
+
     let provider = await Provider.findOne({ userId });
 
     if (provider) {
@@ -52,7 +75,9 @@ router.post("/profile", async (req, res) => {
       provider.price = parsePricingToNumber(price);
       provider.location = location;
       provider.phoneNumber = phoneNumber || provider.phoneNumber;
-      provider.profileImage = profileImage || provider.profileImage;
+      if (profileImageUrl) {
+        provider.profileImage = profileImageUrl;
+      }
       provider.description = description || provider.description;
       provider.approved = true;
       provider.reviewStatus = "approved";
@@ -65,7 +90,7 @@ router.post("/profile", async (req, res) => {
         price: parsePricingToNumber(price),
         location,
         phoneNumber: phoneNumber || "",
-        profileImage: profileImage || null,
+        profileImage: profileImageUrl || null,
         description: description || "Experienced service provider.",
         approved: true,
         reviewStatus: "approved",
@@ -73,7 +98,11 @@ router.post("/profile", async (req, res) => {
       await provider.save();
     }
 
-    res.json({ message: "Profile saved successfully.", provider });
+    res.json({ message: "Profile saved successfully.", provider: {
+      _id: provider._id,
+      profileImage: provider.profileImage,
+      ...provider.toObject()
+    } });
   } catch (error) {
     console.error("Provider profile error:", error);
     res.status(500).json({ message: "Failed to save provider profile." });

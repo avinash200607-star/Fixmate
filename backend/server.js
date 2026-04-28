@@ -69,7 +69,11 @@ app.get("/api/config", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/providers", providersRoutes);
+// Apply upload middleware to all provider POST requests
+app.use("/api/providers", upload.fields([
+  { name: "profileImage", maxCount: 1 },
+  { name: "portfolioImages", maxCount: 10 }
+]), providersRoutes);
 app.use("/api/bookings", bookingsRoutes);
 app.use("/api/admin", adminRoutes);
 

@@ -68,10 +68,16 @@ const renderProfile = (profile) => {
     )
     .join("");
 
+  const profileImageUrl = profile.profileImage || profile.profile_image || "https://via.placeholder.com/90x90?text=FM";
+  // If it's a relative path from uploads, make it absolute
+  const imageSrc = profileImageUrl.startsWith("/") 
+    ? `${window.location.protocol}//${window.location.host}${profileImageUrl}`
+    : profileImageUrl;
+
   previewEl.className = "profile-preview";
   previewEl.innerHTML = `
     <div class="provider-header">
-      <img src="${escapeHtml(profile.profileImage || "https://via.placeholder.com/90x90?text=FM")}" alt="Provider profile image" />
+      <img src="${escapeHtml(imageSrc)}" alt="Provider profile image" />
       <div class="provider-info">
         <h3>${escapeHtml(profile.name)}</h3>
         <p>${escapeHtml(profile.serviceType)}</p>
@@ -97,8 +103,9 @@ const fillForm = (profile) => {
   document.getElementById("location").value = profile?.location || "";
   document.getElementById("phoneNumber").value = profile?.phoneNumber || "";
   document.getElementById("description").value = profile?.description || "";
-  // Set selected services
-  setSelectedServices(profile?.serviceType || user.serviceType || "");
+  // Set selected services - handle both serviceType (string) and serviceTypes (array)
+  const serviceTypeString = profile?.serviceType || user.serviceType || "";
+  setSelectedServices(serviceTypeString);
 };
 
 const loadProfile = async () => {
@@ -127,22 +134,31 @@ form.addEventListener("submit", async (event) => {
   
   setStatus("Saving profile...");
 
-  const payload = {
-    userId: user.id,
-    serviceTypes: selectedServices,
-    experience: document.getElementById("experience").value.trim(),
-    price: document.getElementById("pricing").value.trim(),
-    location: document.getElementById("location").value.trim(),
-    phoneNumber: document.getElementById("phoneNumber").value.trim(),
-    description: document.getElementById("description").value.trim(),
-    profileImage: null,
-  };
+  const formData = new FormData();
+  formData.append("userId", user.id);
+  formData.append("serviceTypes", selectedServices.join(", "));
+  formData.append("experience", document.getElementById("experience").value.trim());
+  formData.append("pricing", document.getElementById("pricing").value.trim());
+  formData.append("location", document.getElementById("location").value.trim());
+  formData.append("phoneNumber", document.getElementById("phoneNumber").value.trim());
+  formData.append("description", document.getElementById("description").value.trim());
+
+  // Add profile image if selected
+  const profileImage = document.getElementById("profileImage").files[0];
+  if (profileImage) {
+    formData.append("profileImage", profileImage);
+  }
+
+  // Add portfolio images if selected
+  const portfolioFiles = document.getElementById("portfolioImages").files;
+  for (const file of portfolioFiles) {
+    formData.append("portfolioImages", file);
+  }
 
   try {
     const res = await fetch(`${API_URL}/providers/profile`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: formData,
     });
     const result = await res.json();
 
@@ -153,6 +169,8 @@ form.addEventListener("submit", async (event) => {
 
     setStatus("Profile saved successfully.", "success");
     await loadProfile();
+    document.getElementById("profileImage").value = "";
+    document.getElementById("portfolioImages").value = "";
   } catch {
     setStatus("Unable to save profile.", "error");
   }
