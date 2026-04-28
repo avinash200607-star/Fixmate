@@ -109,19 +109,21 @@ router.post("/profile", (req, res, next) => {
   }
 });
 
-// GET /api/provider/profile/:providerId
-router.get("/profile/:providerId", async (req, res) => {
+// GET /api/providers/profile/:userId - Get provider profile by USER ID
+router.get("/profile/:userId", async (req, res) => {
   try {
-    const provider = await Provider.findById(req.params.providerId);
+    // First, find the provider by userId
+    const provider = await Provider.findOne({ userId: req.params.userId });
     if (!provider) {
       return res.status(404).json({ message: "Profile not found." });
     }
 
-    const user = await User.findById(provider.userId);
+    const user = await User.findById(req.params.userId);
 
     res.json({
       profile: {
-        providerId: provider.userId,
+        providerId: provider._id,
+        userId: provider.userId,
         name: user?.name || "",
         serviceType: provider.serviceTypes ? provider.serviceTypes.join(", ") : "",
         experience: provider.experience || 0,
@@ -130,7 +132,7 @@ router.get("/profile/:providerId", async (req, res) => {
         phoneNumber: provider.phoneNumber || "",
         description: provider.description || "",
         profileImage: provider.profileImage || null,
-        portfolioImages: [],
+        portfolioImages: provider.portfolioImages || [],
       },
     });
   } catch (error) {

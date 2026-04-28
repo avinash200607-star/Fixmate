@@ -69,15 +69,21 @@ const renderProfile = (profile) => {
     .join("");
 
   const profileImageUrl = profile.profileImage || profile.profile_image || "https://via.placeholder.com/90x90?text=FM";
+  
   // If it's a relative path from uploads, make it absolute
-  const imageSrc = profileImageUrl.startsWith("/") 
-    ? `${window.location.protocol}//${window.location.host}${profileImageUrl}`
-    : profileImageUrl;
+  let imageSrc = profileImageUrl;
+  if (profileImageUrl.startsWith("/uploads/")) {
+    imageSrc = `${window.location.protocol}//${window.location.host}${profileImageUrl}`;
+  } else if (profileImageUrl.startsWith("/")) {
+    imageSrc = `${window.location.protocol}//${window.location.host}${profileImageUrl}`;
+  }
+  
+  console.log("Image URL:", profileImageUrl, "Final src:", imageSrc);
 
   previewEl.className = "profile-preview";
   previewEl.innerHTML = `
     <div class="provider-header">
-      <img src="${escapeHtml(imageSrc)}" alt="Provider profile image" />
+      <img src="${escapeHtml(imageSrc)}" alt="Provider profile image" onerror="this.src='https://via.placeholder.com/90x90?text=FM'" />
       <div class="provider-info">
         <h3>${escapeHtml(profile.name)}</h3>
         <p>${escapeHtml(profile.serviceType)}</p>
@@ -111,14 +117,21 @@ const fillForm = (profile) => {
 const loadProfile = async () => {
   try {
     const res = await fetch(`${API_URL}/providers/profile/${user.id}`);
+    console.log("Fetch response status:", res.status);
+    
     if (!res.ok) {
+      console.log("Profile not found or error");
       renderProfile(null);
       return;
     }
+    
     const data = await res.json();
+    console.log("Profile data loaded:", data);
+    
     fillForm(data.profile);
     renderProfile(data.profile);
-  } catch {
+  } catch (error) {
+    console.error("Error loading profile:", error);
     renderProfile(null);
   }
 };
