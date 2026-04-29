@@ -125,6 +125,10 @@ function createProviderCard(provider) {
     ? `<img src="${profileImageUrl}" alt="${provider.name}" />`
     : `<i class="fa-solid fa-user"></i>`;
 
+  const profilePicHtml = profileImageUrl
+    ? `<img src="${profileImageUrl}" alt="${provider.name}" class="provider-pic-thumbnail" />`
+    : `<i class="fa-solid fa-user"></i>`;
+
   return `
     <div class="provider-card">
       <div class="provider-image ${!profileImageUrl ? "no-image" : ""}">
@@ -135,9 +139,14 @@ function createProviderCard(provider) {
         </div>
       </div>
       <div class="provider-content">
-        <div class="provider-header">
-          <div class="provider-name">${escapeHtml(provider.name)}</div>
-          <div class="provider-service">${escapeHtml(provider.service_type)}</div>
+        <div class="provider-header-with-pic">
+          <div class="provider-pic-circle ${!profileImageUrl ? "no-image" : ""}">
+            ${profilePicHtml}
+          </div>
+          <div class="provider-name-section">
+            <div class="provider-name">${escapeHtml(provider.name)}</div>
+            <div class="provider-service">${escapeHtml(provider.service_type)}</div>
+          </div>
         </div>
 
         <div class="provider-info">

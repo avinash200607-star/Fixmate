@@ -70,7 +70,7 @@ const renderProfile = (profile) => {
       } else if (img.startsWith("/")) {
         imageSrc = `${window.location.protocol}//${window.location.host}${img}`;
       }
-      return `<article class="portfolio-card"><img src="${escapeHtml(imageSrc)}" alt="Work sample" onerror="this.src='https://via.placeholder.com/150x150?text=Portfolio'" /></article>`;
+      return `<article class="portfolio-card"><img src="${imageSrc}" alt="Work sample" onerror="this.src='https://via.placeholder.com/150x150?text=Portfolio'" /></article>`;
     })
     .join("");
 
@@ -90,7 +90,7 @@ const renderProfile = (profile) => {
   previewEl.className = "profile-preview";
   previewEl.innerHTML = `
     <div class="provider-header">
-      <img src="${escapeHtml(imageSrc)}" alt="Provider profile image" onerror="this.src='https://via.placeholder.com/90x90?text=FM'" />
+      <img class="provider-avatar-pic" src="${imageSrc}" alt="Provider profile image" onerror="this.src='https://via.placeholder.com/90x90?text=FM'" />
       <div class="provider-info">
         <h3>${escapeHtml(profile.name)}</h3>
         <p>${escapeHtml(profile.serviceType)}</p>
