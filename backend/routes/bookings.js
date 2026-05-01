@@ -18,7 +18,15 @@ const mapBookingStatusForFrontend = (status) => {
 // POST /api/bookings (Create new booking)
 router.post("/", async (req, res) => {
   try {
-    const { userId, providerId, serviceType, date, time, address, phoneNumber, problemDescription } = req.body;
+    // Support both snake_case (from frontend) and camelCase formats
+    const userId = req.body.userId || req.body.user_id;
+    const providerId = req.body.providerId || req.body.provider_id;
+    const serviceType = req.body.serviceType || req.body.service_type;
+    const date = req.body.date || req.body.booking_date;
+    const time = req.body.time || req.body.booking_time;
+    const address = req.body.address || req.body.location || req.body.full_address;
+    const phoneNumber = req.body.phoneNumber || req.body.phone_number;
+    const problemDescription = req.body.problemDescription || req.body.problem_description || "";
 
     if (!userId || !providerId || !serviceType || !date || !time || !address) {
       return res.status(400).json({ message: "All required fields must be provided." });
@@ -41,14 +49,14 @@ router.post("/", async (req, res) => {
       time,
       address,
       phoneNumber,
-      problemDescription: problemDescription || "",
+      problemDescription,
       status: "pending",
     });
 
     await booking.save();
 
     res.status(201).json({
-      message: "Booking created successfully.",
+      message: "Booking created successfully. Waiting for provider response.",
       booking: {
         id: booking._id,
         user_id: booking.userId,
@@ -130,6 +138,86 @@ router.patch("/:bookingId", async (req, res) => {
   } catch (error) {
     console.error("Booking status update error:", error);
     res.status(500).json({ message: "Failed to update booking." });
+  }
+});
+
+// PATCH /api/bookings/:bookingId/accept (Accept booking)
+router.patch("/:bookingId/accept", async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.bookingId,
+      { status: "accepted" },
+      { new: true }
+    ).populate("userId", "name email");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    res.json({
+      message: "✓ Booking accepted successfully.",
+      booking: {
+        id: booking._id,
+        user_id: booking.userId,
+        service_type: booking.serviceType,
+        booking_date: booking.date,
+        booking_time: booking.time,
+        status: "confirmed"
+      }
+    });
+  } catch (error) {
+    console.error("Accept booking error:", error);
+    res.status(500).json({ message: "Failed to accept booking." });
+  }
+});
+
+// PATCH /api/bookings/:bookingId/reject (Reject booking)
+router.patch("/:bookingId/reject", async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.bookingId,
+      { status: "rejected" },
+      { new: true }
+    );
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    res.json({
+      message: "✗ Booking rejected successfully.",
+      booking: {
+        id: booking._id,
+        status: "cancelled"
+      }
+    });
+  } catch (error) {
+    console.error("Reject booking error:", error);
+    res.status(500).json({ message: "Failed to reject booking." });
+  }
+});
+
+// GET /api/bookings/provider/:id/pending (Get pending bookings for provider)
+router.get("/provider/:id/pending", async (req, res) => {
+  try {
+    const bookings = await Booking.find({ providerId: req.params.id, status: "pending" })
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 });
+
+    const result = bookings.map((b) => ({
+      ...b.toObject(),
+      service_type: b.serviceType,
+      booking_date: b.date,
+      booking_time: b.time,
+      full_address: b.address,
+      phone_number: b.phoneNumber,
+      status: "pending",
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error("Pending bookings error:", error);
+    res.status(500).json({ message: "Failed to fetch pending bookings." });
   }
 });
 
