@@ -2,6 +2,7 @@ const express = require("express");
 const Booking = require("../models/Booking");
 const Provider = require("../models/Provider");
 const User = require("../models/User");
+const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -16,10 +17,10 @@ const mapBookingStatusForFrontend = (status) => {
 };
 
 // POST /api/bookings (Create new booking)
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
     // Support both snake_case (from frontend) and camelCase formats
-    const userId = req.body.userId || req.body.user_id;
+    const userId = req.user.id;
     const providerId = req.body.providerId || req.body.provider_id;
     const serviceType = req.body.serviceType || req.body.service_type;
     const date = req.body.date || req.body.booking_date;
@@ -28,7 +29,7 @@ router.post("/", async (req, res) => {
     const phoneNumber = req.body.phoneNumber || req.body.phone_number;
     const problemDescription = req.body.problemDescription || req.body.problem_description || "";
 
-    if (!userId || !providerId || !serviceType || !date || !time || !address) {
+    if (!providerId || !serviceType || !date || !time || !address) {
       return res.status(400).json({ message: "All required fields must be provided." });
     }
 
@@ -77,7 +78,7 @@ router.post("/", async (req, res) => {
 });
 
 // GET /api/bookings/provider/:id (Get bookings for provider)
-router.get("/provider/:id", async (req, res) => {
+router.get("/provider/:id", authMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ providerId: req.params.id })
       .populate("userId", "name email")
@@ -100,7 +101,7 @@ router.get("/provider/:id", async (req, res) => {
 });
 
 // GET /api/bookings/user/:id (Get bookings for user)
-router.get("/user/:id", async (req, res) => {
+router.get("/user/:id", authMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ userId: req.params.id })
       .populate("providerId", "location serviceTypes")
@@ -123,7 +124,7 @@ router.get("/user/:id", async (req, res) => {
 });
 
 // PATCH /api/bookings/:bookingId (Update booking status)
-router.patch("/:bookingId", async (req, res) => {
+router.patch("/:bookingId", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -142,7 +143,7 @@ router.patch("/:bookingId", async (req, res) => {
 });
 
 // PATCH /api/bookings/:bookingId/accept (Accept booking)
-router.patch("/:bookingId/accept", async (req, res) => {
+router.patch("/:bookingId/accept", authMiddleware, async (req, res) => {
   try {
     const booking = await Booking.findByIdAndUpdate(
       req.params.bookingId,
@@ -172,7 +173,7 @@ router.patch("/:bookingId/accept", async (req, res) => {
 });
 
 // PATCH /api/bookings/:bookingId/reject (Reject booking)
-router.patch("/:bookingId/reject", async (req, res) => {
+router.patch("/:bookingId/reject", authMiddleware, async (req, res) => {
   try {
     const booking = await Booking.findByIdAndUpdate(
       req.params.bookingId,
@@ -198,7 +199,7 @@ router.patch("/:bookingId/reject", async (req, res) => {
 });
 
 // GET /api/bookings/provider/:id/pending (Get pending bookings for provider)
-router.get("/provider/:id/pending", async (req, res) => {
+router.get("/provider/:id/pending", authMiddleware, async (req, res) => {
   try {
     const bookings = await Booking.find({ providerId: req.params.id, status: "pending" })
       .populate("userId", "name email")

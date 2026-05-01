@@ -148,6 +148,7 @@ loginForm.addEventListener("submit", async (e) => {
     }
 
     localStorage.setItem("fixmateUser", JSON.stringify(data.user));
+    localStorage.setItem("fixmateToken", data.token);
     setStatus("Login successful!", "success");
 
     window.location.href = "/index.html";
@@ -183,6 +184,7 @@ async function handleGoogleSignInSuccess(response) {
     }
 
     localStorage.setItem("fixmateUser", JSON.stringify(data.user));
+    localStorage.setItem("fixmateToken", data.token);
     setStatus("Login successful!", "success");
 
     window.location.href = "/index.html";

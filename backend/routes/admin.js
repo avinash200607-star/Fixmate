@@ -2,6 +2,8 @@ const express = require("express");
 const Provider = require("../models/Provider");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
+const authMiddleware = require("../middleware/auth");
+const isAdmin = require("../middleware/isAdmin");
 
 const router = express.Router();
 
@@ -31,7 +33,7 @@ const providerToFrontend = (provider, user, req) => ({
 });
 
 // GET /api/admin/providers/pending (Get pending provider approvals)
-router.get("/providers/pending", async (req, res) => {
+router.get("/providers/pending", authMiddleware, isAdmin, async (req, res) => {
   try {
     const providers = await Provider.find({ reviewStatus: "pending" })
       .populate("userId", "name email")
@@ -46,7 +48,7 @@ router.get("/providers/pending", async (req, res) => {
 });
 
 // GET /api/admin/providers (Get all providers)
-router.get("/providers", async (req, res) => {
+router.get("/providers", authMiddleware, isAdmin, async (req, res) => {
   try {
     const providers = await Provider.find()
       .populate("userId", "name email")
@@ -61,7 +63,7 @@ router.get("/providers", async (req, res) => {
 });
 
 // PATCH /api/admin/providers/:id/approve (Approve provider)
-router.patch("/providers/:id/approve", async (req, res) => {
+router.patch("/providers/:id/approve", authMiddleware, isAdmin, async (req, res) => {
   try {
     if (!req.params.id) {
       return res.status(400).json({ message: "Invalid provider id." });
@@ -81,7 +83,7 @@ router.patch("/providers/:id/approve", async (req, res) => {
 });
 
 // PATCH /api/admin/providers/:id/reject (Reject provider)
-router.patch("/providers/:id/reject", async (req, res) => {
+router.patch("/providers/:id/reject", authMiddleware, isAdmin, async (req, res) => {
   try {
     if (!req.params.id) {
       return res.status(400).json({ message: "Invalid provider id." });
@@ -101,7 +103,7 @@ router.patch("/providers/:id/reject", async (req, res) => {
 });
 
 // DELETE /api/admin/providers/:id (Delete provider profile)
-router.delete("/providers/:id", async (req, res) => {
+router.delete("/providers/:id", authMiddleware, isAdmin, async (req, res) => {
   try {
     if (!req.params.id) {
       return res.status(400).json({ message: "Invalid provider id." });

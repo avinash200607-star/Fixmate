@@ -54,7 +54,11 @@ const loadBookings = async () => {
   if (!currentUser) return;
 
   try {
-    const response = await fetch(`${API_URL}/bookings/user/${currentUser.id}`);
+    const token = localStorage.getItem("fixmateToken");
+    const headers = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_URL}/bookings/user/${currentUser.id}`, { headers });
     if (!response.ok) throw new Error("Failed to fetch bookings");
 
     allBookings = await response.json();

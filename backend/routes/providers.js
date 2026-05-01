@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/User");
 const Provider = require("../models/Provider");
+const authMiddleware = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -40,7 +41,7 @@ const providerToFrontend = (provider, user, req) => ({
 
 // POST /api/providers/profile (Save/Update provider profile)
 // Note: This route expects FormData with optional file uploads
-router.post("/profile", (req, res, next) => {
+router.post("/profile", authMiddleware, (req, res, next) => {
   // If there's a file, the upload middleware should be applied
   if (req.body.profileImage === "undefined" || req.body.profileImage === null) {
     delete req.body.profileImage;
@@ -48,7 +49,8 @@ router.post("/profile", (req, res, next) => {
   next();
 }, async (req, res) => {
   try {
-    let { userId, serviceTypes, experience, pricing, location, phoneNumber, description } = req.body;
+    let { serviceTypes, experience, pricing, location, phoneNumber, description } = req.body;
+    const userId = req.user.id;
     
     // Support both "pricing" and "price" field names
     const price = pricing || req.body.price;
@@ -58,8 +60,8 @@ router.post("/profile", (req, res, next) => {
       serviceTypes = serviceTypes.split(",").map(s => s.trim()).filter(s => s);
     }
 
-    if (!userId || !serviceTypes || serviceTypes.length === 0 || !location) {
-      return res.status(400).json({ message: "userId, serviceTypes, and location are required." });
+    if (!serviceTypes || serviceTypes.length === 0 || !location) {
+      return res.status(400).json({ message: "serviceTypes and location are required." });
     }
 
     if (phoneNumber && !/^\d{10}$/.test(phoneNumber)) {

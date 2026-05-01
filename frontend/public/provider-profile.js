@@ -186,9 +186,14 @@ form.addEventListener("submit", async (event) => {
     formData.append("portfolioImages", file);
   }
 
+  const token = localStorage.getItem("fixmateToken");
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   try {
     const res = await fetch(`${API_URL}/providers/profile`, {
       method: "POST",
+      headers,
       body: formData,
     });
     const result = await res.json();

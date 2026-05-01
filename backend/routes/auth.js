@@ -1,5 +1,6 @@
 const express = require("express");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const Provider = require("../models/Provider");
@@ -39,8 +40,15 @@ router.post("/signup", async (req, res) => {
 
     await newUser.save();
 
+    const token = jwt.sign(
+      { id: newUser._id, role: newUser.role },
+      process.env.JWT_SECRET || "super_secret_dev_key_12345",
+      { expiresIn: "7d" }
+    );
+
     res.status(201).json({
       message: "Account created successfully.",
+      token,
       user: {
         id: newUser._id,
         name: newUser.name,
@@ -82,8 +90,15 @@ router.post("/login", async (req, res) => {
       provider = await Provider.findOne({ userId: user._id });
     }
 
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET || "super_secret_dev_key_12345",
+      { expiresIn: "7d" }
+    );
+
     res.json({
       message: "Login successful.",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -118,8 +133,15 @@ router.post("/admin/login", async (req, res) => {
       return res.status(401).json({ message: "Invalid admin credentials." });
     }
 
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET || "super_secret_dev_key_12345",
+      { expiresIn: "7d" }
+    );
+
     res.json({
       message: "Admin login successful.",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -183,8 +205,15 @@ router.post("/google", async (req, res) => {
       provider = await Provider.findOne({ userId: user._id });
     }
 
+    const jwtToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET || "super_secret_dev_key_12345",
+      { expiresIn: "7d" }
+    );
+
     res.json({
       message: "Google authentication successful.",
+      token: jwtToken,
       user: {
         id: user._id,
         name: user.name,

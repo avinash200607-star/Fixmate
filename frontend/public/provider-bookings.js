@@ -49,7 +49,11 @@ const loadBookings = async () => {
   if (!currentProvider) return;
 
   try {
-    const response = await fetch(`${API_URL}/bookings/provider/${currentProvider.id}`);
+    const token = localStorage.getItem("fixmateToken");
+    const headers = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const response = await fetch(`${API_URL}/bookings/provider/${currentProvider.id}`, { headers });
     if (!response.ok) throw new Error("Failed to fetch bookings");
 
     allBookings = await response.json();
@@ -213,9 +217,13 @@ const createBookingCard = (booking) => {
 // Update booking status
 const updateBookingStatus = async (bookingId, newStatus) => {
   try {
+    const token = localStorage.getItem("fixmateToken");
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ status: newStatus }),
     });
 

@@ -46,6 +46,7 @@ if (adminForm) {
       }
 
       localStorage.setItem("fixmateUser", JSON.stringify(result.user));
+      localStorage.setItem("fixmateToken", result.token);
       setAdminStatus("Login successful. Redirecting...", "success");
       window.location.href = "/admin-panel";
     } catch (error) {

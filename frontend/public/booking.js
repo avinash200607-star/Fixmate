@@ -227,10 +227,14 @@ form.addEventListener("submit", async (event) => {
     problem_description: document.getElementById("problem-description").value.trim(),
   };
 
+  const headers = { "Content-Type": "application/json" };
+  const token = localStorage.getItem("fixmateToken");
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   try {
     const response = await fetch(`${API_URL}/bookings`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify(bookingData),
     });
 

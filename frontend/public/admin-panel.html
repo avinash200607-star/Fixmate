@@ -91,6 +91,13 @@
     if (user.role !== "admin") {
       window.location.href = "admin-login.html";
     }
+
+    const authFetch = (url, options = {}) => {
+      const token = localStorage.getItem("fixmateToken");
+      const headers = { ...options.headers };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      return fetch(url, { ...options, headers });
+    };
     document.getElementById("admin-name").textContent = user.name || "-";
     document.getElementById("admin-email").textContent = user.email || "-";
     document.getElementById("admin-role").textContent = user.role || "-";
@@ -114,7 +121,7 @@
 
     const loadPending = async () => {
       try {
-        const response = await fetch(`${API_URL}/admin/providers/pending`);
+        const response = await authFetch(`${API_URL}/admin/providers/pending`);
         const rows = await response.json();
         if (!response.ok) {
           setStatus(rows.message || "Failed to load pending providers.", "error");
@@ -169,7 +176,7 @@
 
     const loadAllProviders = async () => {
       try {
-        const response = await fetch(`${API_URL}/admin/providers`);
+        const response = await authFetch(`${API_URL}/admin/providers`);
         const rows = await response.json();
         if (!response.ok) {
           setStatus(rows.message || "Failed to load providers.", "error");
@@ -224,7 +231,7 @@
 
     const approveProvider = async (id) => {
       try {
-        const response = await fetch(`${API_URL}/admin/providers/${id}/approve`, { method: "PATCH" });
+        const response = await authFetch(`${API_URL}/admin/providers/${id}/approve`, { method: "PATCH" });
         const result = await response.json();
         if (!response.ok) {
           setStatus(result.message || "Failed to approve provider.", "error");
@@ -240,7 +247,7 @@
 
     const rejectProvider = async (id) => {
       try {
-        const response = await fetch(`${API_URL}/admin/providers/${id}/reject`, { method: "PATCH" });
+        const response = await authFetch(`${API_URL}/admin/providers/${id}/reject`, { method: "PATCH" });
         const result = await response.json();
         if (!response.ok) {
           setStatus(result.message || "Failed to reject provider.", "error");
@@ -258,7 +265,7 @@
       const ok = window.confirm("This will permanently delete provider profile and related bookings. Continue?");
       if (!ok) return;
       try {
-        const response = await fetch(`${API_URL}/admin/providers/${id}`, { method: "DELETE" });
+        const response = await authFetch(`${API_URL}/admin/providers/${id}`, { method: "DELETE" });
         const result = await response.json();
         if (!response.ok) {
           setStatus(result.message || "Failed to delete provider profile.", "error");
