@@ -1,5 +1,18 @@
-// ✅ FIXED API URL (IMPORTANT)
-const API_URL = "https://fixmate-1-v9cf.onrender.com/api";
+// API Configuration - Works on all devices (localhost, mobile, production)
+const API_URL = (() => {
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  
+  // If we're on localhost, use localhost:3000
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:3000/api`;
+  }
+  
+  // For IP addresses or domain names, use the current location
+  const baseUrl = port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
+  return `${baseUrl}/api`;
+})();
 
 const tabButtons = document.querySelectorAll(".tab-btn");
 const loginForm = document.getElementById("login-form");

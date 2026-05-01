@@ -17,7 +17,7 @@ const providerToFrontend = (provider, user) => ({
   review_status: provider.reviewStatus || "",
   description: provider.description || "Experienced service provider.",
   profile_image: provider.profileImage || null,
-  portfolio_images: "[]",
+  portfolio_images: JSON.stringify(provider.portfolioImages || []),
 });
 
 // GET /api/admin/providers/pending (Get pending provider approvals)

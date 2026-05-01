@@ -1,7 +1,18 @@
-// API Configuration
-const API_URL = window.location.hostname === 'localhost' 
-  ? 'http://localhost:3000/api'
-  : window.location.protocol + '//' + window.location.host + '/api';
+// API Configuration - Works on all devices (localhost, mobile, production)
+const API_URL = (() => {
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  
+  // If we're on localhost, use localhost:3000
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:3000/api`;
+  }
+  
+  // For IP addresses or domain names, use the current location
+  const baseUrl = port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
+  return `${baseUrl}/api`;
+})();
 
 let allBookings = [];
 let currentUser = null;
