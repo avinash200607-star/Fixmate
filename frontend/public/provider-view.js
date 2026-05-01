@@ -27,7 +27,9 @@ const modalClose = document.getElementById("modal-close");
 const toPublicUrl = (maybePath) => {
   const raw = String(maybePath || "").trim();
   if (!raw) return "";
+  // If it's already an absolute URL, return as-is
   if (/^https?:\/\//i.test(raw)) return raw;
+  // If it's a relative path, ensure it starts with /
   return raw.startsWith("/") ? raw : `/${raw}`;
 };
 

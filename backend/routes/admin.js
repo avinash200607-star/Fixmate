@@ -5,7 +5,17 @@ const Booking = require("../models/Booking");
 
 const router = express.Router();
 
-const providerToFrontend = (provider, user) => ({
+// Helper function to build absolute image URLs
+const buildImageUrl = (req, imagePath) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http")) return imagePath;
+  
+  const protocol = req.protocol || "http";
+  const host = req.get("host") || req.hostname;
+  return `${protocol}://${host}${imagePath}`;
+};
+
+const providerToFrontend = (provider, user, req) => ({
   id: provider._id,
   provider_id: provider._id,
   name: user?.name || "Provider",
@@ -16,18 +26,18 @@ const providerToFrontend = (provider, user) => ({
   phone_number: provider.phoneNumber || "",
   review_status: provider.reviewStatus || "",
   description: provider.description || "Experienced service provider.",
-  profile_image: provider.profileImage || null,
-  portfolio_images: JSON.stringify(provider.portfolioImages || []),
+  profile_image: buildImageUrl(req, provider.profileImage),
+  portfolio_images: JSON.stringify((provider.portfolioImages || []).map(img => buildImageUrl(req, img))),
 });
 
 // GET /api/admin/providers/pending (Get pending provider approvals)
-router.get("/providers/pending", async (_req, res) => {
+router.get("/providers/pending", async (req, res) => {
   try {
     const providers = await Provider.find({ reviewStatus: "pending" })
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
-    const result = providers.map((provider) => providerToFrontend(provider, provider.userId));
+    const result = providers.map((provider) => providerToFrontend(provider, provider.userId, req));
     res.json(result);
   } catch (error) {
     console.error("Pending providers error:", error);
@@ -36,13 +46,13 @@ router.get("/providers/pending", async (_req, res) => {
 });
 
 // GET /api/admin/providers (Get all providers)
-router.get("/providers", async (_req, res) => {
+router.get("/providers", async (req, res) => {
   try {
     const providers = await Provider.find()
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
-    const result = providers.map((provider) => providerToFrontend(provider, provider.userId));
+    const result = providers.map((provider) => providerToFrontend(provider, provider.userId, req));
     res.json(result);
   } catch (error) {
     console.error("All providers error:", error);

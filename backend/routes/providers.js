@@ -13,7 +13,17 @@ const parsePricingToNumber = (value) => {
   return Number(numeric || 0);
 };
 
-const providerToFrontend = (provider, user) => ({
+// Helper function to build absolute image URLs
+const buildImageUrl = (req, imagePath) => {
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http")) return imagePath;
+  
+  const protocol = req.protocol || "http";
+  const host = req.get("host") || req.hostname;
+  return `${protocol}://${host}${imagePath}`;
+};
+
+const providerToFrontend = (provider, user, req) => ({
   id: provider._id,
   provider_id: provider._id,
   name: user?.name || "Provider",
@@ -24,8 +34,8 @@ const providerToFrontend = (provider, user) => ({
   phone_number: provider.phoneNumber || "",
   review_status: provider.reviewStatus || "",
   description: provider.description || "Experienced service provider.",
-  profile_image: provider.profileImage || null,
-  portfolio_images: JSON.stringify(provider.portfolioImages || []),
+  profile_image: buildImageUrl(req, provider.profileImage),
+  portfolio_images: JSON.stringify((provider.portfolioImages || []).map(img => buildImageUrl(req, img))),
 });
 
 // POST /api/providers/profile (Save/Update provider profile)
@@ -166,13 +176,13 @@ router.get("/profile/:userId", async (req, res) => {
 });
 
 // GET /api/providers (Get all approved providers)
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
   try {
     const providers = await Provider.find({ approved: true, serviceTypes: { $exists: true, $ne: [] } })
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
-    const result = providers.map((provider) => providerToFrontend(provider, provider.userId));
+    const result = providers.map((provider) => providerToFrontend(provider, provider.userId, req));
     res.json(result);
   } catch (error) {
     console.error("Fetch providers error:", error);
@@ -189,7 +199,7 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Provider not found." });
     }
 
-    res.json(providerToFrontend(provider, provider.userId));
+    res.json(providerToFrontend(provider, provider.userId, req));
   } catch (error) {
     console.error("Provider fetch error:", error);
     res.status(500).json({ message: "Failed to fetch provider." });

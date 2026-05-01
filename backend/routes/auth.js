@@ -255,4 +255,53 @@ router.post("/reset-password", async (req, res) => {
   }
 });
 
+// DEBUG: GET /api/auth/check-admin (Verify admin exists)
+router.get("/check-admin", async (req, res) => {
+  try {
+    const admin = await User.findOne({ role: "admin" }).select("+password");
+    
+    if (!admin) {
+      return res.json({ exists: false, message: "No admin user found in database" });
+    }
+
+    // Test password
+    const passwordMatch = await admin.comparePassword("admin123");
+    
+    res.json({
+      exists: true,
+      email: admin.email,
+      name: admin.name,
+      defaultPasswordWorks: passwordMatch,
+      message: passwordMatch ? "✓ Admin can login with admin@fixmate.com / admin123" : "✗ Default password doesn't match"
+    });
+  } catch (error) {
+    console.error("Check admin error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// DEBUG: POST /api/auth/reset-admin-password (Reset admin password to admin123)
+router.post("/reset-admin-password", async (req, res) => {
+  try {
+    const admin = await User.findOne({ role: "admin" });
+    
+    if (!admin) {
+      return res.status(404).json({ message: "Admin user not found" });
+    }
+
+    // Update password - will be hashed by pre-save hook
+    admin.password = "admin123";
+    await admin.save();
+
+    res.json({
+      message: "✓ Admin password reset to: admin123",
+      email: "admin@fixmate.com",
+      password: "admin123"
+    });
+  } catch (error) {
+    console.error("Reset admin password error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
