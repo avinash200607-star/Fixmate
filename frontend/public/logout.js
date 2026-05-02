@@ -1,37 +1,123 @@
-// Logout Utility for FixMate
-// Usage: Add <script src="logout.js"></script> to any authenticated page
+// Global Utilities for FixMate
+// Handles: Theme Toggle, Admin Link Injection, and Logout
+// Usage: Add <script src="logout.js"></script> to any page
+
+const setupThemeToggle = () => {
+  const navActions = document.querySelector(".nav-actions");
+  if (!navActions) return;
+
+  // Create theme toggle button
+  const themeToggle = document.createElement("button");
+  themeToggle.className = "theme-toggle-btn";
+  themeToggle.title = "Toggle Dark Mode";
+  
+  // Check saved theme or system preference
+  const savedTheme = localStorage.getItem("fixmateTheme");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const isDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+  
+  if (isDark) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
+  } else {
+    document.documentElement.setAttribute("data-theme", "light");
+    themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
+  }
+
+  // Add styles for the toggle
+  const style = document.createElement("style");
+  style.textContent = `
+    .theme-toggle-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 9px 12px;
+      cursor: pointer;
+      color: var(--muted);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .theme-toggle-btn:hover {
+      background: var(--light);
+      color: var(--primary);
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Toggle logic
+  themeToggle.addEventListener("click", () => {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("fixmateTheme", newTheme);
+    
+    themeToggle.innerHTML = newTheme === "dark" 
+      ? '<i class="fa-solid fa-sun"></i>' 
+      : '<i class="fa-solid fa-moon"></i>';
+  });
+
+  navActions.insertBefore(themeToggle, navActions.firstChild);
+};
+
+const setupAdminLink = (user) => {
+  if (!user || user.role !== "admin") return;
+
+  const menu = document.querySelector(".menu");
+  if (!menu) return;
+
+  // Check if Admin Panel link already exists to avoid duplicates
+  const existingAdminLink = Array.from(menu.querySelectorAll("a")).find(a => a.textContent.includes("Admin Panel"));
+  if (existingAdminLink) return;
+
+  const adminLink = document.createElement("a");
+  adminLink.href = "admin-panel.html";
+  adminLink.textContent = "Admin Panel";
+  
+  // Highlight if currently on admin panel
+  if (window.location.pathname.includes("admin-panel.html")) {
+    adminLink.className = "active";
+  }
+
+  menu.appendChild(adminLink);
+};
 
 const setupLogout = () => {
+  setupThemeToggle();
+
   const user = JSON.parse(localStorage.getItem("fixmateUser") || "{}");
   
+  setupAdminLink(user);
+
   if (!user.id) {
-    // Not logged in, don't show anything
+    // Not logged in, don't show profile
     return;
   }
 
   const navActions = document.querySelector(".nav-actions");
-  if (!navActions) {
-    return;
-  }
+  if (!navActions) return;
 
   // Create profile dropdown wrapper
   const profileDropdown = document.createElement("div");
   profileDropdown.className = "user-profile-dropdown";
   profileDropdown.innerHTML = `
     <button class="profile-btn" title="Profile menu">
-      ${user.profilePicture ? `<img src="${user.profilePicture}" alt="${user.name}" class="profile-pic" />` : `<div class="profile-pic-placeholder">${user.name?.charAt(0).toUpperCase() || 'U'}</div>`}
-      <span class="profile-name">${user.name || 'Profile'}</span>
+      ${user.profilePicture ? \`<img src="\${user.profilePicture}" alt="\${user.name}" class="profile-pic" />\` : \`<div class="profile-pic-placeholder">\${user.name?.charAt(0).toUpperCase() || 'U'}</div>\`}
+      <span class="profile-name">\${user.name || 'Profile'}</span>
     </button>
     <div class="dropdown-menu">
       <div class="dropdown-header">
-        <p class="dropdown-name">${user.name || 'User'}</p>
-        <p class="dropdown-email">${user.email || ''}</p>
+        <p class="dropdown-name">\${user.name || 'User'}</p>
+        <p class="dropdown-email">\${user.email || ''}</p>
       </div>
       <hr class="dropdown-divider" />
-      <a href="/${user.role === 'provider' ? 'provider-profile' : 'user-bookings'}.html" class="dropdown-link">
-        <i class="fa-solid fa-user"></i> ${user.role === 'provider' ? 'My Profile' : 'My Bookings'}
+      <a href="/\${user.role === 'provider' ? 'provider-profile' : 'user-bookings'}.html" class="dropdown-link">
+        <i class="fa-solid fa-user"></i> \${user.role === 'provider' ? 'My Profile' : 'My Bookings'}
       </a>
-      ${user.role === 'provider' ? `<a href="/provider-bookings.html" class="dropdown-link"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>` : ''}\n      <a href="/user-bookings.html" class="dropdown-link" id="bookings-link" style="display:none;"><i class="fa-solid fa-calendar-check"></i> My Bookings</a>
+      \${user.role === 'provider' ? \`<a href="/provider-bookings.html" class="dropdown-link"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>\` : ''}
+      <a href="/user-bookings.html" class="dropdown-link" id="bookings-link" style="display:none;"><i class="fa-solid fa-calendar-check"></i> My Bookings</a>
       <hr class="dropdown-divider" />
       <button class="dropdown-link logout-btn">
         <i class="fa-solid fa-sign-out-alt"></i> Logout
@@ -44,6 +130,7 @@ const setupLogout = () => {
   style.textContent = `
     .user-profile-dropdown {
       position: relative;
+      margin-left: 10px;
     }
 
     .profile-btn {
@@ -51,18 +138,18 @@ const setupLogout = () => {
       align-items: center;
       gap: 8px;
       background: none;
-      border: 1px solid #e3ebf7;
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 6px 10px;
       cursor: pointer;
       font-weight: 500;
-      color: #0f2945;
+      color: var(--text);
       transition: all 0.3s ease;
     }
 
     .profile-btn:hover {
-      border-color: #0a2540;
-      background: #f4f7fb;
+      border-color: var(--primary);
+      background: var(--light);
     }
 
     .profile-pic {
@@ -70,14 +157,14 @@ const setupLogout = () => {
       height: 32px;
       border-radius: 50%;
       object-fit: cover;
-      border: 1px solid #e3ebf7;
+      border: 1px solid var(--border);
     }
 
     .profile-pic-placeholder {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #0a2540, #123d6a);
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
       color: white;
       display: flex;
       align-items: center;
@@ -99,8 +186,8 @@ const setupLogout = () => {
       right: 0;
       margin-top: 8px;
       width: 240px;
-      background: white;
-      border: 1px solid #e3ebf7;
+      background: var(--white);
+      border: 1px solid var(--border);
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(10, 37, 64, 0.15);
       z-index: 1000;
@@ -125,20 +212,20 @@ const setupLogout = () => {
     .dropdown-name {
       margin: 0;
       font-weight: 600;
-      color: #0f2945;
+      color: var(--text);
       font-size: 0.95rem;
     }
 
     .dropdown-email {
       margin: 4px 0 0;
       font-size: 0.85rem;
-      color: #5c6f84;
+      color: var(--muted);
     }
 
     .dropdown-divider {
       margin: 0;
       border: none;
-      border-top: 1px solid #e3ebf7;
+      border-top: 1px solid var(--border);
     }
 
     .dropdown-link {
@@ -149,7 +236,7 @@ const setupLogout = () => {
       padding: 10px 16px;
       border: none;
       background: none;
-      color: #0f2945;
+      color: var(--text);
       text-decoration: none;
       cursor: pointer;
       font-size: 0.95rem;
@@ -159,8 +246,8 @@ const setupLogout = () => {
     }
 
     .dropdown-link:hover {
-      background: #f4f7fb;
-      color: #123d6a;
+      background: var(--light);
+      color: var(--primary);
     }
 
     .logout-btn {
@@ -202,6 +289,7 @@ const setupLogout = () => {
   // Handle logout
   logoutBtn.addEventListener("click", () => {
     localStorage.removeItem("fixmateUser");
+    localStorage.removeItem("fixmateToken");
     window.location.href = "/auth.html";
   });
 
@@ -212,7 +300,7 @@ const setupLogout = () => {
     existingAuthBtns.forEach((btn) => btn.remove());
   }
 
-  navActions.insertBefore(profileDropdown, navActions.firstChild);
+  navActions.appendChild(profileDropdown);
 };
 
 // Initialize when DOM is ready

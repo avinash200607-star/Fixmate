@@ -38,6 +38,19 @@ router.get("/providers", authMiddleware, isAdmin, async (req, res) => {
   }
 });
 
+// GET /api/admin/users (Get all regular users)
+router.get("/users", authMiddleware, isAdmin, async (req, res) => {
+  try {
+    const users = await User.find({ role: "user" })
+      .select("-password")
+      .sort({ createdAt: -1 });
+    res.json(users);
+  } catch (error) {
+    console.error("All users error:", error);
+    res.status(500).json({ message: "Failed to fetch users." });
+  }
+});
+
 // PATCH /api/admin/providers/:id/approve (Approve provider)
 router.patch("/providers/:id/approve", authMiddleware, isAdmin, async (req, res) => {
   try {
