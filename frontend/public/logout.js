@@ -104,19 +104,19 @@ const setupLogout = () => {
   profileDropdown.className = "user-profile-dropdown";
   profileDropdown.innerHTML = `
     <button class="profile-btn" title="Profile menu">
-      ${user.profilePicture ? \`<img src="\${user.profilePicture}" alt="\${user.name}" class="profile-pic" />\` : \`<div class="profile-pic-placeholder">\${user.name?.charAt(0).toUpperCase() || 'U'}</div>\`}
-      <span class="profile-name">\${user.name || 'Profile'}</span>
+      ${user.profilePicture ? `<img src="${user.profilePicture}" alt="${user.name}" class="profile-pic" />` : `<div class="profile-pic-placeholder">${user.name?.charAt(0).toUpperCase() || 'U'}</div>`}
+      <span class="profile-name">${user.name || 'Profile'}</span>
     </button>
     <div class="dropdown-menu">
       <div class="dropdown-header">
-        <p class="dropdown-name">\${user.name || 'User'}</p>
-        <p class="dropdown-email">\${user.email || ''}</p>
+        <p class="dropdown-name">${user.name || 'User'}</p>
+        <p class="dropdown-email">${user.email || ''}</p>
       </div>
       <hr class="dropdown-divider" />
-      <a href="/\${user.role === 'provider' ? 'provider-profile' : 'user-bookings'}.html" class="dropdown-link">
-        <i class="fa-solid fa-user"></i> \${user.role === 'provider' ? 'My Profile' : 'My Bookings'}
+      <a href="/${user.role === 'provider' ? 'provider-profile' : 'user-bookings'}.html" class="dropdown-link">
+        <i class="fa-solid fa-user"></i> ${user.role === 'provider' ? 'My Profile' : 'My Bookings'}
       </a>
-      \${user.role === 'provider' ? \`<a href="/provider-bookings.html" class="dropdown-link"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>\` : ''}
+      ${user.role === 'provider' ? `<a href="/provider-bookings.html" class="dropdown-link"><i class="fa-solid fa-calendar-check"></i> Manage Bookings</a>` : ''}
       <a href="/user-bookings.html" class="dropdown-link" id="bookings-link" style="display:none;"><i class="fa-solid fa-calendar-check"></i> My Bookings</a>
       <hr class="dropdown-divider" />
       <button class="dropdown-link logout-btn">
