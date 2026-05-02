@@ -88,8 +88,13 @@
     })();
 
     const user = JSON.parse(localStorage.getItem("fixmateUser") || "{}");
-    if (user.role !== "admin") {
+    
+    // Protect admin panel - redirect if not admin
+    if (!user.role || user.role !== "admin") {
+      // Redirect to login page immediately
       window.location.href = "admin-login.html";
+      // Stop execution of rest of the script
+      throw new Error("Unauthorized access to admin panel");
     }
 
     const authFetch = (url, options = {}) => {

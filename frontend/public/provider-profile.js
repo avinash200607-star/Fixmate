@@ -162,6 +162,13 @@ form.addEventListener("submit", async (event) => {
     setStatus("Please select at least one service type.", "error");
     return;
   }
+
+  // Validate phone number (10 digits only)
+  const phoneNumber = document.getElementById("phoneNumber").value.trim();
+  if (phoneNumber && !/^\d{10}$/.test(phoneNumber)) {
+    setStatus("Please enter a valid 10-digit phone number.", "error");
+    return;
+  }
   
   setStatus("Saving profile...");
 
@@ -171,7 +178,7 @@ form.addEventListener("submit", async (event) => {
   formData.append("experience", document.getElementById("experience").value.trim());
   formData.append("pricing", document.getElementById("pricing").value.trim());
   formData.append("location", document.getElementById("location").value.trim());
-  formData.append("phoneNumber", document.getElementById("phoneNumber").value.trim());
+  formData.append("phoneNumber", phoneNumber);
   formData.append("description", document.getElementById("description").value.trim());
 
   // Add profile image if selected
