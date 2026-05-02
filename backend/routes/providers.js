@@ -83,7 +83,6 @@ router.post("/profile", authMiddleware, (req, res, next) => {
     let portfolioImageUrls = [];
     if (req.files && req.files.portfolioImages) {
       portfolioImageUrls = req.files.portfolioImages.map(file => `/uploads/${file.filename}`);
-      console.log("📸 Portfolio images uploaded:", portfolioImageUrls);
     }
 
     let provider = await Provider.findOne({ userId });
@@ -100,7 +99,6 @@ router.post("/profile", authMiddleware, (req, res, next) => {
       // Add new portfolio images to existing ones
       if (portfolioImageUrls.length > 0) {
         provider.portfolioImages = [...(provider.portfolioImages || []), ...portfolioImageUrls];
-        console.log("✅ Portfolio images saved to DB:", provider.portfolioImages);
       }
       provider.description = description || provider.description;
       provider.approved = true;
@@ -120,7 +118,6 @@ router.post("/profile", authMiddleware, (req, res, next) => {
         approved: true,
         reviewStatus: "approved",
       });
-      console.log("✅ New provider created with portfolio images:", portfolioImageUrls);
       await provider.save();
     }
 
@@ -141,15 +138,11 @@ router.get("/profile/:userId", async (req, res) => {
     // First, find the provider by userId
     const provider = await Provider.findOne({ userId: req.params.userId });
     if (!provider) {
-      console.log("❌ Provider not found for userId:", req.params.userId);
       return res.status(404).json({ message: "Profile not found." });
     }
 
     const user = await User.findById(req.params.userId);
     
-    console.log("✅ Provider found for userId:", req.params.userId);
-    console.log("📸 Portfolio images in DB:", provider.portfolioImages);
-
     // Convert portfolio image paths to full URLs if needed
     const portfolioImages = (provider.portfolioImages || []).map(img => {
       if (img.startsWith("http")) return img;

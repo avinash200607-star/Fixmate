@@ -146,9 +146,6 @@ router.patch("/:bookingId", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
     const bookingId = req.params.bookingId;
-
-    console.log(`📝 Updating booking ${bookingId} to status: ${status}`);
-
     const validStatuses = ["pending", "accepted", "rejected", "completed"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid booking status." });
@@ -161,11 +158,9 @@ router.patch("/:bookingId", authMiddleware, async (req, res) => {
     );
 
     if (!booking) {
-      console.log(`❌ Booking ${bookingId} not found!`);
       return res.status(404).json({ message: "Booking not found." });
     }
 
-    console.log(`✅ Booking ${bookingId} updated to ${status}`);
     res.json({ 
       message: "Booking status updated successfully.",
       booking: {
