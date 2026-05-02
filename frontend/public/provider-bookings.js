@@ -53,10 +53,12 @@ const loadBookings = async () => {
     const headers = {};
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
+    console.log(`📥 Fetching bookings for provider:`, currentProvider.id);
     const response = await fetch(`${API_URL}/bookings/provider/${currentProvider.id}`, { headers });
     if (!response.ok) throw new Error("Failed to fetch bookings");
 
     allBookings = await response.json();
+    console.log(`📦 Received ${allBookings.length} bookings:`, allBookings);
     renderBookings();
   } catch (error) {
     console.error("Error loading bookings:", error);
@@ -124,7 +126,10 @@ const createBookingCard = (booking) => {
     day: "numeric",
   });
 
-  const normalizedStatus = {
+  console.log(`Booking card data:`, booking);
+
+  // Use displayStatus for showing to user, but use actual status for logic
+  const displayStatus = booking.displayStatus || {
     accepted: "confirmed",
     rejected: "cancelled",
     pending: "pending",
@@ -136,22 +141,23 @@ const createBookingCard = (booking) => {
     confirmed: "status-confirmed",
     completed: "status-completed",
     cancelled: "status-cancelled",
-  }[normalizedStatus] || "status-pending";
+  }[displayStatus] || "status-pending";
 
   let actionButtons = "";
 
+  // Check ACTUAL status, not display status
   if (booking.status === "pending") {
     actionButtons = `
-      <button class="btn-action btn-accept" data-booking-id="${booking.id}">
+      <button class="btn-action btn-accept" data-booking-id="${booking.id || booking._id}">
         <i class="fa-solid fa-check"></i> Accept
       </button>
-      <button class="btn-action btn-reject" data-booking-id="${booking.id}">
+      <button class="btn-action btn-reject" data-booking-id="${booking.id || booking._id}">
         <i class="fa-solid fa-times"></i> Reject
       </button>
     `;
   } else if (booking.status === "accepted") {
     actionButtons = `
-      <button class="btn-action btn-complete" data-booking-id="${booking.id}">
+      <button class="btn-action btn-complete" data-booking-id="${booking.id || booking._id}">
         <i class="fa-solid fa-check-double"></i> Mark Complete
       </button>
     `;
@@ -162,9 +168,9 @@ const createBookingCard = (booking) => {
       <div class="booking-card-header">
         <div class="booking-card-title">
           <h3>${escapeHtml(booking.service_type)}</h3>
-          <p class="booking-id">Booking #${String(booking.id).padStart(6, "0")}</p>
+          <p class="booking-id">Booking #${String(booking.id || booking._id).slice(-6).padStart(6, "0")}</p>
         </div>
-        <span class="status-badge ${statusColor}">${normalizedStatus}</span>
+        <span class="status-badge ${statusColor}">${displayStatus}</span>
       </div>
 
       <div class="booking-card-body">
@@ -223,19 +229,29 @@ const updateBookingStatus = async (bookingId, newStatus) => {
     const headers = { "Content-Type": "application/json" };
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
+    console.log(`📤 Sending update request:`, { bookingId, newStatus, url: `${API_URL}/bookings/${bookingId}` });
+
     const response = await fetch(`${API_URL}/bookings/${bookingId}`, {
       method: "PATCH",
       headers,
       body: JSON.stringify({ status: newStatus }),
     });
 
-    if (!response.ok) throw new Error("Failed to update booking");
+    console.log(`📥 Response status:`, response.status);
+    const responseData = await response.json();
+    console.log(`📥 Response data:`, responseData);
 
-    // Update local data
-    const numericId = Number(bookingId);
-    const booking = allBookings.find((b) => b.id === numericId);
+    if (!response.ok) {
+      throw new Error(responseData.message || "Failed to update booking");
+    }
+
+    // Update local data - find by actual ID
+    const booking = allBookings.find((b) => String(b.id || b._id) === String(bookingId));
     if (booking) {
       booking.status = newStatus;
+      console.log(`✅ Updated local booking status to:`, newStatus);
+    } else {
+      console.warn(`⚠️ Booking not found in local array:`, bookingId);
     }
 
     renderBookings();

@@ -100,11 +100,13 @@ router.get("/provider/:id", authMiddleware, async (req, res) => {
 
     const result = bookings.map((b) => ({
       ...b.toObject(),
+      id: b._id,
       service_type: b.serviceType,
       booking_date: b.date,
       booking_time: b.time,
       full_address: b.address,
-      status: mapBookingStatusForFrontend(b.status),
+      status: b.status,
+      displayStatus: mapBookingStatusForFrontend(b.status),
     }));
 
     res.json(result);
@@ -123,11 +125,13 @@ router.get("/user/:id", authMiddleware, async (req, res) => {
 
     const result = bookings.map((b) => ({
       ...b.toObject(),
+      id: b._id,
       service_type: b.serviceType,
       booking_date: b.date,
       booking_time: b.time,
       full_address: b.address,
-      status: mapBookingStatusForFrontend(b.status),
+      status: b.status,
+      displayStatus: mapBookingStatusForFrontend(b.status),
     }));
 
     res.json(result);
@@ -141,18 +145,38 @@ router.get("/user/:id", authMiddleware, async (req, res) => {
 router.patch("/:bookingId", authMiddleware, async (req, res) => {
   try {
     const { status } = req.body;
+    const bookingId = req.params.bookingId;
+
+    console.log(`📝 Updating booking ${bookingId} to status: ${status}`);
 
     const validStatuses = ["pending", "accepted", "rejected", "completed"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid booking status." });
     }
 
-    await Booking.findByIdAndUpdate(req.params.bookingId, { status }, { new: true });
+    const booking = await Booking.findByIdAndUpdate(
+      bookingId, 
+      { status }, 
+      { new: true }
+    );
 
-    res.json({ message: "Booking status updated successfully." });
+    if (!booking) {
+      console.log(`❌ Booking ${bookingId} not found!`);
+      return res.status(404).json({ message: "Booking not found." });
+    }
+
+    console.log(`✅ Booking ${bookingId} updated to ${status}`);
+    res.json({ 
+      message: "Booking status updated successfully.",
+      booking: {
+        id: booking._id,
+        status: booking.status,
+        displayStatus: mapBookingStatusForFrontend(booking.status)
+      }
+    });
   } catch (error) {
     console.error("Booking status update error:", error);
-    res.status(500).json({ message: "Failed to update booking." });
+    res.status(500).json({ message: "Failed to update booking.", error: error.message });
   }
 });
 
