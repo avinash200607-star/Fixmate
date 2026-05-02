@@ -30,7 +30,7 @@ app.use(helmet());
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per windowMs
+  max: 500, // 500 requests per windowMs
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
@@ -38,13 +38,13 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Stricter limit for auth endpoints
+  max: 20, // Stricter limit for auth endpoints
   message: "Too many login/signup attempts, please try again later.",
   skipSuccessfulRequests: true,
 });
 
-// Apply rate limiting globally
-app.use(limiter);
+// Apply rate limiting to API routes only, not static files
+app.use("/api", limiter);
 
 // ========================
 // Middleware Setup
