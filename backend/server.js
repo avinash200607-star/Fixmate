@@ -153,11 +153,10 @@ const startServer = async () => {
     // Create default admin if not exists
     const adminUser = await User.findOne({ role: "admin" });
     if (!adminUser) {
-      const hash = await bcrypt.hash("admin123", 10);
       await User.create({
         name: "FixMate Admin",
         email: "admin@fixmate.com",
-        password: hash,
+        password: "admin123",
         role: "admin",
       });
       console.log("✓ Default admin created");
