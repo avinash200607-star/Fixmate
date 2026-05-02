@@ -95,9 +95,13 @@ router.post(
     }
 
     const normalizedRole = normalizeRole(role);
-    const user = await User.findOne({ email: email.toLowerCase(), role: normalizedRole }).select("+password");
+    let user = await User.findOne({ email: email.toLowerCase() }).select("+password");
 
     if (!user) {
+      return res.status(401).json({ message: "Invalid email or password." });
+    }
+
+    if (user.role !== "admin" && user.role !== normalizedRole) {
       return res.status(401).json({ message: "Invalid credentials for selected role." });
     }
 
