@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const Provider = require("../models/Provider");
 const authMiddleware = require("../middleware/auth");
+const { providerToFrontend, buildImageUrl } = require("../utils/transformers");
 
 const router = express.Router();
 
@@ -13,31 +14,6 @@ const parsePricingToNumber = (value) => {
   const numeric = raw.replace(/[^\d]/g, "");
   return Number(numeric || 0);
 };
-
-// Helper function to build absolute image URLs
-const buildImageUrl = (req, imagePath) => {
-  if (!imagePath) return null;
-  if (imagePath.startsWith("http")) return imagePath;
-  
-  const protocol = req.protocol || "http";
-  const host = req.get("host") || req.hostname;
-  return `${protocol}://${host}${imagePath}`;
-};
-
-const providerToFrontend = (provider, user, req) => ({
-  id: provider._id,
-  provider_id: provider._id,
-  name: user?.name || "Provider",
-  service_type: provider.serviceTypes ? provider.serviceTypes.join(", ") : "",
-  experience_years: provider.experience || 0,
-  pricing: provider.price ? `Starting at Rs.${provider.price}` : "Contact for pricing",
-  location: provider.location || "",
-  phone_number: provider.phoneNumber || "",
-  review_status: provider.reviewStatus || "",
-  description: provider.description || "Experienced service provider.",
-  profile_image: buildImageUrl(req, provider.profileImage),
-  portfolio_images: JSON.stringify((provider.portfolioImages || []).map(img => buildImageUrl(req, img))),
-});
 
 // POST /api/providers/profile (Save/Update provider profile)
 // Note: This route expects FormData with optional file uploads
@@ -101,8 +77,8 @@ router.post("/profile", authMiddleware, (req, res, next) => {
         provider.portfolioImages = [...(provider.portfolioImages || []), ...portfolioImageUrls];
       }
       provider.description = description || provider.description;
-      provider.approved = true;
-      provider.reviewStatus = "approved";
+      // Do NOT auto-approve - must wait for admin review
+      provider.reviewStatus = "pending";
       await provider.save();
     } else {
       provider = new Provider({
@@ -115,8 +91,8 @@ router.post("/profile", authMiddleware, (req, res, next) => {
         profileImage: profileImageUrl || null,
         portfolioImages: portfolioImageUrls,
         description: description || "Experienced service provider.",
-        approved: true,
-        reviewStatus: "approved",
+        approved: false,
+        reviewStatus: "pending",
       });
       await provider.save();
     }

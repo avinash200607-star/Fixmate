@@ -12,7 +12,12 @@ module.exports = (req, res, next) => {
       return res.status(401).json({ message: "Authentication token is missing." });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "super_secret_dev_key_12345");
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      console.error("CRITICAL: JWT_SECRET environment variable is not set");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+    const decoded = jwt.verify(token, jwtSecret);
     req.user = decoded; // Contains id and role
     next();
   } catch (error) {

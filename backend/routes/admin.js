@@ -4,33 +4,9 @@ const User = require("../models/User");
 const Booking = require("../models/Booking");
 const authMiddleware = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
+const { providerToFrontend } = require("../utils/transformers");
 
 const router = express.Router();
-
-// Helper function to build absolute image URLs
-const buildImageUrl = (req, imagePath) => {
-  if (!imagePath) return null;
-  if (imagePath.startsWith("http")) return imagePath;
-  
-  const protocol = req.protocol || "http";
-  const host = req.get("host") || req.hostname;
-  return `${protocol}://${host}${imagePath}`;
-};
-
-const providerToFrontend = (provider, user, req) => ({
-  id: provider._id,
-  provider_id: provider._id,
-  name: user?.name || "Provider",
-  service_type: provider.serviceTypes ? provider.serviceTypes.join(", ") : "",
-  experience_years: provider.experience || 0,
-  pricing: provider.price ? `Starting at Rs.${provider.price}` : "Contact for pricing",
-  location: provider.location || "",
-  phone_number: provider.phoneNumber || "",
-  review_status: provider.reviewStatus || "",
-  description: provider.description || "Experienced service provider.",
-  profile_image: buildImageUrl(req, provider.profileImage),
-  portfolio_images: JSON.stringify((provider.portfolioImages || []).map(img => buildImageUrl(req, img))),
-});
 
 // GET /api/admin/providers/pending (Get pending provider approvals)
 router.get("/providers/pending", authMiddleware, isAdmin, async (req, res) => {

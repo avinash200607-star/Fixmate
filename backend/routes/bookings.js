@@ -1,8 +1,14 @@
 const express = require("express");
+const { body } = require("express-validator");
 const Booking = require("../models/Booking");
 const Provider = require("../models/Provider");
 const User = require("../models/User");
 const authMiddleware = require("../middleware/auth");
+const {
+  validatePhone,
+  sanitizeDescription,
+  handleValidationErrors,
+} = require("../middleware/validation");
 
 const router = express.Router();
 
@@ -17,7 +23,13 @@ const mapBookingStatusForFrontend = (status) => {
 };
 
 // POST /api/bookings (Create new booking)
-router.post("/", authMiddleware, async (req, res) => {
+router.post(
+  "/",
+  authMiddleware,
+  validatePhone,
+  sanitizeDescription,
+  handleValidationErrors,
+  async (req, res) => {
   try {
     // Support both snake_case (from frontend) and camelCase formats
     const userId = req.user.id;
@@ -75,7 +87,8 @@ router.post("/", authMiddleware, async (req, res) => {
     console.error("Booking creation error:", error);
     res.status(500).json({ message: "Failed to create booking." });
   }
-});
+  }
+);
 
 // GET /api/bookings/provider/:id (Get bookings for provider)
 // Accepts both Provider ID and User ID for flexibility

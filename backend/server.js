@@ -5,6 +5,9 @@ const fs = require("fs");
 const cors = require("cors");
 const multer = require("multer");
 const bcrypt = require("bcryptjs");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const { body, validationResult } = require("express-validator");
 const connectDB = require("./config/db");
 const User = require("./models/User");
 
@@ -16,6 +19,32 @@ const adminRoutes = require("./routes/admin");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ========================
+// Security Middleware
+// ========================
+
+// Add security headers
+app.use(helmet());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Stricter limit for auth endpoints
+  message: "Too many login/signup attempts, please try again later.",
+  skipSuccessfulRequests: true,
+});
+
+// Apply rate limiting globally
+app.use(limiter);
 
 // ========================
 // Middleware Setup
@@ -46,6 +75,16 @@ if (!fs.existsSync(uploadsDir)) {
 }
 app.use("/uploads", express.static(uploadsDir));
 
+// File type validation
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+const fileFilter = (_req, file, cb) => {
+  if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error(`Invalid file type. Allowed: ${ALLOWED_MIME_TYPES.join(', ')}`), false);
+  }
+};
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, uploadsDir),
@@ -58,6 +97,7 @@ const upload = multer({
     },
   }),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: fileFilter,
 });
 
 // ========================
@@ -68,6 +108,8 @@ app.get("/api/config", (_req, res) => {
   res.json({ googleClientId: process.env.GOOGLE_CLIENT_ID || null });
 });
 
+// Apply stricter rate limiting to auth endpoints
+app.use("/api/auth", authLimiter);
 app.use("/api/auth", authRoutes);
 // Apply upload middleware to all provider POST requests
 app.use("/api/providers", upload.fields([
@@ -150,16 +192,28 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    // Create default admin if not exists
-    const adminUser = await User.findOne({ role: "admin" });
-    if (!adminUser) {
-      await User.create({
-        name: "FixMate Admin",
-        email: "admin@fixmate.com",
-        password: "admin123",
-        role: "admin",
-      });
-      console.log("✓ Default admin created");
+    // Only create default admin if explicitly enabled via environment variable
+    if (process.env.CREATE_DEFAULT_ADMIN === "true") {
+      const adminUser = await User.findOne({ role: "admin" });
+      if (!adminUser) {
+        const adminPassword = process.env.ADMIN_PASSWORD;
+        if (!adminPassword || adminPassword === "admin123") {
+          console.warn("⚠️  WARNING: Using weak default admin password. Set ADMIN_PASSWORD env var.");
+        }
+        await User.create({
+          name: "FixMate Admin",
+          email: process.env.ADMIN_EMAIL || "admin@fixmate.com",
+          password: adminPassword || "admin123",
+          role: "admin",
+        });
+        console.log("✓ Default admin created");
+      }
+    } else {
+      // In production, admin must be created manually
+      const adminUser = await User.findOne({ role: "admin" });
+      if (!adminUser && process.env.NODE_ENV === "production") {
+        console.warn("⚠️  No admin user found. Create one manually before using admin features.");
+      }
     }
 
     app.listen(PORT, () => {

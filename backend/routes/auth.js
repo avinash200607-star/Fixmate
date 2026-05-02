@@ -4,6 +4,12 @@ const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const Provider = require("../models/Provider");
+const {
+  validateEmail,
+  validatePassword,
+  validateName,
+  handleValidationErrors,
+} = require("../middleware/validation");
 
 const router = express.Router();
 const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
@@ -12,7 +18,13 @@ const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
 const normalizeRole = (role) => (role === "provider" || role === "admin" ? role : "user");
 
 // POST /api/auth/signup
-router.post("/signup", async (req, res) => {
+router.post(
+  "/signup",
+  validateName,
+  validateEmail,
+  validatePassword,
+  handleValidationErrors,
+  async (req, res) => {
   try {
     const { name, email, password, role, serviceTypes, googleId } = req.body;
 
@@ -40,9 +52,13 @@ router.post("/signup", async (req, res) => {
 
     await newUser.save();
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
     const token = jwt.sign(
       { id: newUser._id, role: newUser.role },
-      process.env.JWT_SECRET || "super_secret_dev_key_12345",
+      jwtSecret,
       { expiresIn: "7d" }
     );
 
@@ -65,7 +81,12 @@ router.post("/signup", async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post("/login", async (req, res) => {
+router.post(
+  "/login",
+  validateEmail,
+  validatePassword,
+  handleValidationErrors,
+  async (req, res) => {
   try {
     const { email, password, role } = req.body;
 
@@ -90,9 +111,13 @@ router.post("/login", async (req, res) => {
       provider = await Provider.findOne({ userId: user._id });
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not set");
+    }
     const token = jwt.sign(
       { id: user._id, role: user.role },
-      process.env.JWT_SECRET || "super_secret_dev_key_12345",
+      jwtSecret,
       { expiresIn: "7d" }
     );
 
@@ -111,7 +136,8 @@ router.post("/login", async (req, res) => {
     console.error("Login error:", error);
     res.status(500).json({ message: "Failed to login." });
   }
-});
+  }
+);
 
 // POST /api/auth/admin/login
 router.post("/admin/login", async (req, res) => {
