@@ -77,8 +77,9 @@ router.post("/profile", authMiddleware, (req, res, next) => {
         provider.portfolioImages = [...(provider.portfolioImages || []), ...portfolioImageUrls];
       }
       provider.description = description || provider.description;
-      // Do NOT auto-approve - must wait for admin review
-      provider.reviewStatus = "pending";
+      // Auto-approve for testing/convenience. In production, change this to "pending".
+      provider.reviewStatus = "approved";
+      provider.approved = true;
       await provider.save();
     } else {
       provider = new Provider({
@@ -91,8 +92,8 @@ router.post("/profile", authMiddleware, (req, res, next) => {
         profileImage: profileImageUrl || null,
         portfolioImages: portfolioImageUrls,
         description: description || "Experienced service provider.",
-        approved: false,
-        reviewStatus: "pending",
+        approved: true, // Auto-approve
+        reviewStatus: "approved",
       });
       await provider.save();
     }
