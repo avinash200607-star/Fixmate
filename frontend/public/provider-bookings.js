@@ -95,14 +95,14 @@ const renderBookings = () => {
   document.querySelectorAll(".btn-accept").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const bookingId = e.target.dataset.bookingId;
-      updateBookingStatus(bookingId, "confirmed");
+      updateBookingStatus(bookingId, "accepted");
     });
   });
 
   document.querySelectorAll(".btn-reject").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const bookingId = e.target.dataset.bookingId;
-      updateBookingStatus(bookingId, "cancelled");
+      updateBookingStatus(bookingId, "rejected");
     });
   });
 
@@ -127,6 +127,8 @@ const createBookingCard = (booking) => {
   const normalizedStatus = {
     accepted: "confirmed",
     rejected: "cancelled",
+    pending: "pending",
+    completed: "completed"
   }[booking.status] || booking.status;
 
   const statusColor = {
@@ -138,7 +140,7 @@ const createBookingCard = (booking) => {
 
   let actionButtons = "";
 
-  if (normalizedStatus === "pending") {
+  if (booking.status === "pending") {
     actionButtons = `
       <button class="btn-action btn-accept" data-booking-id="${booking.id}">
         <i class="fa-solid fa-check"></i> Accept
@@ -147,7 +149,7 @@ const createBookingCard = (booking) => {
         <i class="fa-solid fa-times"></i> Reject
       </button>
     `;
-  } else if (normalizedStatus === "confirmed") {
+  } else if (booking.status === "accepted") {
     actionButtons = `
       <button class="btn-action btn-complete" data-booking-id="${booking.id}">
         <i class="fa-solid fa-check-double"></i> Mark Complete
@@ -239,9 +241,9 @@ const updateBookingStatus = async (bookingId, newStatus) => {
     renderBookings();
 
     const statusText = {
-      confirmed: "Booking accepted! Customer will be notified.",
-      cancelled: "Booking rejected!",
-      completed: "Booking marked as complete!",
+      accepted: "✓ Booking accepted! Customer will be notified.",
+      rejected: "✗ Booking rejected!",
+      completed: "✓ Booking marked as complete!",
     }[newStatus] || "Booking updated!";
 
     showMessage(statusText, "success");
