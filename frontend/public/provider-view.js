@@ -14,6 +14,16 @@ const API_URL = (() => {
   return `${baseUrl}/api`;
 })();
 
+const BASE_URL = (() => {
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:3000`;
+  }
+  return port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
+})();
+
 // Get provider ID from URL
 const params = new URLSearchParams(window.location.search);
 const providerId = params.get("id");
@@ -30,7 +40,8 @@ const toPublicUrl = (maybePath) => {
   // If it's already an absolute URL, return as-is
   if (/^https?:\/\//i.test(raw)) return raw;
   // If it's a relative path, ensure it starts with /
-  return raw.startsWith("/") ? raw : `/${raw}`;
+  const path = raw.startsWith("/") ? raw : `/${raw}`;
+  return `${BASE_URL}${path}`;
 };
 
 // Modal controls

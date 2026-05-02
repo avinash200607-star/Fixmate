@@ -14,6 +14,16 @@ const API_URL = (() => {
   return `${baseUrl}/api`;
 })();
 
+const BASE_URL = (() => {
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:3000`;
+  }
+  return port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
+})();
+
 const form = document.getElementById("provider-profile-form");
 const statusEl = document.getElementById("status");
 const previewEl = document.getElementById("profile-preview");
@@ -77,9 +87,9 @@ const renderProfile = (profile) => {
     .map((img) => {
       let imageSrc = img;
       if (img.startsWith("/uploads/")) {
-        imageSrc = `${window.location.protocol}//${window.location.host}${img}`;
+        imageSrc = `${BASE_URL}${img}`;
       } else if (img.startsWith("/")) {
-        imageSrc = `${window.location.protocol}//${window.location.host}${img}`;
+        imageSrc = `${BASE_URL}${img}`;
       }
       return `<article class="portfolio-card"><img src="${imageSrc}" alt="Work sample" onerror="this.src='https://via.placeholder.com/150x150?text=Portfolio'" /></article>`;
     })
@@ -90,9 +100,9 @@ const renderProfile = (profile) => {
   // If it's a relative path from uploads, make it absolute
   let imageSrc = profileImageUrl;
   if (profileImageUrl.startsWith("/uploads/")) {
-    imageSrc = `${window.location.protocol}//${window.location.host}${profileImageUrl}`;
+    imageSrc = `${BASE_URL}${profileImageUrl}`;
   } else if (profileImageUrl.startsWith("/")) {
-    imageSrc = `${window.location.protocol}//${window.location.host}${profileImageUrl}`;
+    imageSrc = `${BASE_URL}${profileImageUrl}`;
   }
   
   console.log("Image URL:", profileImageUrl, "Final src:", imageSrc);

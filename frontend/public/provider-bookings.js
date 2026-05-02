@@ -205,10 +205,11 @@ const createBookingCard = (booking) => {
 
       <div class="customer-info">
         <div class="customer-avatar">
-          U
+          ${(booking.userId && booking.userId.name) ? escapeHtml(booking.userId.name.charAt(0).toUpperCase()) : "U"}
         </div>
         <div class="customer-contact">
-          <p class="customer-name">Customer</p>
+          <p class="customer-name">${escapeHtml((booking.userId && booking.userId.name) ? booking.userId.name : "Customer")}</p>
+          ${(booking.userId && booking.userId.email) ? `<p class="customer-email" style="font-size: 0.8rem; color: #718096; margin-bottom: 4px;"><i class="fa-regular fa-envelope"></i> ${escapeHtml(booking.userId.email)}</p>` : ""}
           <p class="customer-phone"><i class="fa-solid fa-phone"></i> ${escapeHtml(booking.phone_number)}</p>
         </div>
       </div>

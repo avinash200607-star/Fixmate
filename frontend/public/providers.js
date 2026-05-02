@@ -14,6 +14,16 @@ const API_URL = (() => {
   return `${baseUrl}/api`;
 })();
 
+const BASE_URL = (() => {
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  const port = window.location.port;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://localhost:3000`;
+  }
+  return port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}`;
+})();
+
 let allProviders = [];
 let currentFilter = "all";
 
@@ -26,7 +36,8 @@ const toPublicUrl = (maybePath) => {
   const raw = String(maybePath || "").trim();
   if (!raw) return "";
   if (/^https?:\/\//i.test(raw)) return raw;
-  return raw.startsWith("/") ? raw : `/${raw}`;
+  const path = raw.startsWith("/") ? raw : `/${raw}`;
+  return `${BASE_URL}${path}`;
 };
 
 // Check URL for service parameter
