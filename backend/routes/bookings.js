@@ -78,11 +78,25 @@ router.post("/", authMiddleware, async (req, res) => {
 });
 
 // GET /api/bookings/provider/:id (Get bookings for provider)
+// Accepts both Provider ID and User ID for flexibility
 router.get("/provider/:id", authMiddleware, async (req, res) => {
   try {
-    const bookings = await Booking.find({ providerId: req.params.id })
+    let providerId = req.params.id;
+    
+    // First, try to find bookings using the ID as providerId directly
+    let bookings = await Booking.find({ providerId: providerId })
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
+
+    // If no bookings found, try to look up the provider by userId
+    if (bookings.length === 0) {
+      const provider = await Provider.findOne({ userId: providerId });
+      if (provider) {
+        bookings = await Booking.find({ providerId: provider._id })
+          .populate("userId", "name email")
+          .sort({ createdAt: -1 });
+      }
+    }
 
     const result = bookings.map((b) => ({
       ...b.toObject(),
