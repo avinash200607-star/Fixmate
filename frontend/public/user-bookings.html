@@ -13,7 +13,7 @@
     .user-bookings-main {
       min-height: calc(100vh - 80px);
       padding: 2rem 1rem;
-      background: #f8f9fa;
+      background: var(--bg);
     }
 
     .bookings-container {
@@ -27,7 +27,7 @@
 
     .bookings-header h1 {
       font-size: 2rem;
-      color: #1a202c;
+      color: var(--text);
       margin-bottom: 0.5rem;
       display: flex;
       align-items: center;
@@ -35,7 +35,7 @@
     }
 
     .bookings-header p {
-      color: #718096;
+      color: var(--muted);
       margin: 0;
     }
 
@@ -43,7 +43,7 @@
       display: flex;
       gap: 1rem;
       margin-bottom: 2rem;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid var(--border);
       flex-wrap: wrap;
     }
 
@@ -52,7 +52,7 @@
       border: none;
       background: none;
       cursor: pointer;
-      color: #718096;
+      color: var(--muted);
       font-weight: 500;
       border-bottom: 3px solid transparent;
       transition: all 0.3s ease;
@@ -75,8 +75,8 @@
     }
 
     .booking-card {
-      background: white;
-      border: 1px solid #e2e8f0;
+      background: var(--white);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.5rem;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -85,7 +85,7 @@
 
     .booking-card:hover {
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-      border-color: #cbd5e0;
+      border-color: var(--border);
     }
 
     .booking-card-header {
@@ -104,12 +104,12 @@
 
     .booking-card-title h3 {
       margin: 0 0 0.25rem;
-      color: #1a202c;
+      color: var(--text);
       font-size: 1.1rem;
     }
 
     .booking-id {
-      color: #a0aec0;
+      color: var(--muted);
       font-size: 0.9rem;
       margin: 0;
     }
@@ -149,7 +149,7 @@
       gap: 1.5rem;
       margin-bottom: 1.5rem;
       padding-bottom: 1.5rem;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid var(--border);
     }
 
     .booking-detail {
@@ -159,20 +159,20 @@
     }
 
     .booking-detail-label {
-      color: #718096;
+      color: var(--muted);
       font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
     }
 
     .booking-detail-value {
-      color: #1a202c;
+      color: var(--text);
       font-size: 1rem;
       font-weight: 500;
     }
 
     .address-value {
-      color: #2d3748;
+      color: var(--text);
       line-height: 1.5;
       max-width: 300px;
     }
@@ -182,7 +182,7 @@
       align-items: center;
       gap: 0.75rem;
       padding: 0.75rem;
-      background: #f7fafc;
+      background: var(--light);
       border-radius: 8px;
     }
 
@@ -203,13 +203,13 @@
     }
 
     .provider-name {
-      color: #1a202c;
+      color: var(--text);
       font-weight: 600;
       margin: 0;
     }
 
     .provider-service {
-      color: #718096;
+      color: var(--muted);
       font-size: 0.9rem;
       margin: 0;
     }
@@ -217,9 +217,9 @@
     .empty-state {
       text-align: center;
       padding: 3rem 1rem;
-      background: white;
+      background: var(--white);
       border-radius: 12px;
-      border: 1px dashed #cbd5e0;
+      border: 1px dashed var(--border);
     }
 
     .empty-state i {
@@ -229,12 +229,12 @@
     }
 
     .empty-state h3 {
-      color: #718096;
+      color: var(--muted);
       margin-bottom: 0.5rem;
     }
 
     .empty-state p {
-      color: #a0aec0;
+      color: var(--muted);
       margin: 0;
     }
 

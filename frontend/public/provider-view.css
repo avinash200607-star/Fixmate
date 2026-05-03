@@ -3,7 +3,7 @@
 .provider-view-main {
   min-height: calc(100vh - 80px);
   padding: 2rem 1rem;
-  background: #f8f9fa;
+  background: var(--bg);
 }
 
 .back-link {
@@ -46,7 +46,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
   margin-bottom: 3rem;
-  background: white;
+  background: var(--white);
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -81,7 +81,7 @@
 
 .profile-top h1 {
   font-size: 2rem;
-  color: #1a202c;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
@@ -119,8 +119,8 @@
   flex-direction: column;
   gap: 0.8rem;
   padding: 1rem 0;
-  border-top: 1px solid #e2e8f0;
-  border-bottom: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
   margin-bottom: 1rem;
 }
 
@@ -141,13 +141,13 @@
   display: block;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text);
 }
 
 .stat-label {
   display: block;
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--muted);
   text-transform: uppercase;
 }
 
@@ -157,7 +157,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: #f7fafc;
+  background: var(--light);
   border-radius: 8px;
   margin-bottom: 1.5rem;
 }
@@ -203,18 +203,18 @@
 }
 
 .btn-light.btn-large {
-  background: white;
+  background: var(--white);
   color: #667eea;
   border: 2px solid #667eea;
 }
 
 .btn-light.btn-large:hover {
-  background: #f7fafc;
+  background: var(--light);
 }
 
 /* Profile Sections */
 .profile-section {
-  background: white;
+  background: var(--white);
   padding: 2rem;
   border-radius: 12px;
   margin-bottom: 2rem;
@@ -223,10 +223,10 @@
 
 .profile-section h2 {
   font-size: 1.5rem;
-  color: #1a202c;
+  color: var(--text);
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border);
 }
 
 .about-text {
@@ -283,10 +283,10 @@
 }
 
 .review-card {
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border);
   padding: 1.5rem;
   border-radius: 8px;
-  background: #f8f9fa;
+  background: var(--bg);
 }
 
 .review-header {
@@ -310,12 +310,12 @@
 .reviewer-name {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text);
 }
 
 .review-date {
   font-size: 0.8rem;
-  color: #718096;
+  color: var(--muted);
   margin: 0;
 }
 
@@ -329,7 +329,7 @@
 .review-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text);
   margin: 0.5rem 0;
 }
 
@@ -380,7 +380,7 @@
   position: absolute;
   top: -40px;
   right: 0;
-  background: white;
+  background: var(--white);
   border: none;
   width: 40px;
   height: 40px;
@@ -390,7 +390,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  color: #1a202c;
+  color: var(--text);
   transition: all 0.3s ease;
 }
 

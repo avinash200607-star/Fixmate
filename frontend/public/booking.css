@@ -3,7 +3,7 @@
 .booking-main {
   min-height: calc(100vh - 80px);
   padding: 2rem 1rem;
-  background: #f8f9fa;
+  background: var(--bg);
 }
 
 .back-link {
@@ -29,7 +29,7 @@
 }
 
 .booking-form-section {
-  background: white;
+  background: var(--white);
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -41,13 +41,13 @@
 
 .booking-header h1 {
   font-size: 2rem;
-  color: #1a202c;
+  color: var(--text);
   margin-bottom: 0.5rem;
 }
 
 .service-info {
   font-size: 0.95rem;
-  color: #718096;
+  color: var(--muted);
 }
 
 .booking-form {
@@ -64,7 +64,7 @@
 
 .form-group label {
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text);
   font-size: 0.95rem;
 }
 
@@ -86,8 +86,8 @@
 }
 
 .form-group input[readonly] {
-  background: #f7fafc;
-  color: #718096;
+  background: var(--light);
+  color: var(--muted);
   cursor: not-allowed;
 }
 
@@ -106,7 +106,7 @@
 
 .form-section legend {
   font-weight: 600;
-  color: #1a202c;
+  color: var(--text);
   font-size: 1rem;
   display: flex;
   align-items: center;
@@ -141,7 +141,7 @@
 
 .time-slot:hover {
   border-color: #667eea;
-  background: #f7fafc;
+  background: var(--light);
 }
 
 .time-slot input[type="radio"] {
@@ -170,24 +170,24 @@
 .time-slot-disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background: #f7fafc;
-  border-color: #cbd5e0;
+  background: var(--light);
+  border-color: var(--border);
 }
 
 .time-slot-disabled:hover {
-  border-color: #cbd5e0;
-  background: #f7fafc;
+  border-color: var(--border);
+  background: var(--light);
 }
 
 .time-slot-disabled span {
-  color: #a0aec0;
+  color: var(--muted);
   text-decoration: line-through;
 }
 
 /* Slot Helper Text */
 .slot-note {
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -250,14 +250,14 @@
 }
 
 .btn-light.btn-large {
-  background: white;
+  background: var(--white);
   color: #667eea;
   border: 2px solid #667eea;
   text-decoration: none;
 }
 
 .btn-light.btn-large:hover {
-  background: #f7fafc;
+  background: var(--light);
 }
 
 /* Booking Summary */
@@ -268,7 +268,7 @@
 }
 
 .summary-card {
-  background: white;
+  background: var(--white);
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -276,10 +276,10 @@
 
 .summary-card h3 {
   font-size: 1.2rem;
-  color: #1a202c;
+  color: var(--text);
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid var(--border);
 }
 
 .summary-item {
@@ -291,12 +291,12 @@
 }
 
 .summary-item .label {
-  color: #718096;
+  color: var(--muted);
   font-weight: 500;
 }
 
 .summary-item .value {
-  color: #1a202c;
+  color: var(--text);
   font-weight: 600;
   text-align: right;
 }
@@ -312,7 +312,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: #f7fafc;
+  background: var(--light);
   border-radius: 8px;
   margin-bottom: 1rem;
 }
@@ -330,7 +330,7 @@
 
 .summary-note {
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--muted);
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
@@ -374,7 +374,7 @@
 
 .modal-content {
   position: relative;
-  background: white;
+  background: var(--white);
   border-radius: 16px;
   padding: 2rem;
   max-width: 500px;
@@ -408,7 +408,7 @@
 
 .modal-header h2 {
   font-size: 1.5rem;
-  color: #1a202c;
+  color: var(--text);
   margin: 0;
 }
 
@@ -424,7 +424,7 @@
 }
 
 .booking-details {
-  background: #f7fafc;
+  background: var(--light);
   padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
@@ -438,7 +438,7 @@
 }
 
 .booking-details strong {
-  color: #1a202c;
+  color: var(--text);
 }
 
 .modal-info {
@@ -478,7 +478,7 @@
 }
 
 .modal-actions .btn-light {
-  background: #f7fafc;
+  background: var(--light);
   color: #667eea;
   border: 2px solid #e2e8f0;
 }

@@ -192,11 +192,11 @@ const createBookingCard = (booking) => {
         </div>
 
         ${
-          booking.problem_description
+          (booking.problem_description || booking.problemDescription)
             ? `
           <div class="booking-detail">
             <span class="booking-detail-label">Problem Description</span>
-            <span class="booking-detail-value">${escapeHtml(booking.problem_description)}</span>
+            <span class="booking-detail-value">${escapeHtml(booking.problem_description || booking.problemDescription)}</span>
           </div>
         `
             : ""
@@ -210,7 +210,7 @@ const createBookingCard = (booking) => {
         <div class="customer-contact">
           <p class="customer-name">${escapeHtml((booking.userId && booking.userId.name) ? booking.userId.name : "Customer")}</p>
           ${(booking.userId && booking.userId.email) ? `<p class="customer-email" style="font-size: 0.8rem; color: #718096; margin-bottom: 4px;"><i class="fa-regular fa-envelope"></i> ${escapeHtml(booking.userId.email)}</p>` : ""}
-          <p class="customer-phone"><i class="fa-solid fa-phone"></i> ${escapeHtml(booking.phone_number)}</p>
+          <p class="customer-phone"><i class="fa-solid fa-phone"></i> ${escapeHtml(booking.phone_number || booking.phoneNumber)}</p>
         </div>
       </div>
 

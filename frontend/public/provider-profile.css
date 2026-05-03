@@ -182,7 +182,7 @@ button {
   gap: 10px;
   margin-bottom: 12px;
   padding: 12px;
-  background: #f9fafb;
+  background: var(--light);
   border-radius: 10px;
   border: 1px solid #d4e2f7;
 }
@@ -251,7 +251,7 @@ button {
   object-fit: cover;
   border: 3px solid var(--primary);
   box-shadow: 0 4px 12px rgba(10, 37, 64, 0.15);
-  background: #f4f8ff;
+  background: var(--light);
   display: none;
 }
 
